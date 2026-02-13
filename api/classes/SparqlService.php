@@ -11,7 +11,7 @@ class SparqlService
         $this->cache = new CacheService();
     }
 
-    public function get_street_index($q, $limit, $offset, $type): array
+    public function get_street_index(string $q = "", int $limit, int $offset, string $type, float $lat = 0, float $lon = 0): array
     {
         $search = '';
         if (!empty($q)) {
@@ -30,6 +30,59 @@ class SparqlService
         }
         $filterset = '      FILTER(?itemset IN (' . implode(", ", $sets) . '))';
 
+        if ($lon !== null && $lat !== null && $lon * $lat > 0) {
+            $radiusMeters = 300.0;
+
+            // --- convert meters -> degrees ---
+            // latitude degrees are roughly constant
+            $deltaLat = $radiusMeters / 111320.0;
+
+            // longitude degrees depend on latitude
+            $deltaLon = $radiusMeters / (111320.0 * cos(deg2rad($lat)));
+
+            // --- bounding box ---
+            $minLat = $lat - $deltaLat;
+            $maxLat = $lat + $deltaLat;
+            $minLon = $lon - $deltaLon;
+            $maxLon = $lon + $deltaLon;
+
+            // --- WKT geometries (IMPORTANT: lon lat order!) ---
+            $pointWKT = sprintf(
+                'POINT(%F %F)',
+                $lon,
+                $lat
+            );
+
+            $envWKT = sprintf(
+                'POLYGON((%F %F,%F %F,%F %F,%F %F,%F %F))',
+                $minLon,
+                $minLat,
+                $maxLon,
+                $minLat,
+                $maxLon,
+                $maxLat,
+                $minLon,
+                $maxLat,
+                $minLon,
+                $minLat
+            );
+            $geo_binds = "\n" . '  BIND("' . $pointWKT . '"^^geo:wktLiteral AS ?q)
+  BIND("' . $envWKT . '"^^geo:wktLiteral AS ?env)';
+            $geo_select = "\n                  geo:hasGeometry/geo:asWKT ?wkt ;";
+            $geo_filter = "\nFILTER(geof:sfIntersects(?wkt, ?env))";
+            $geo_bind = "\nBIND (geof:distance(?wkt, ?q) AS ?distM)";
+            $sort = "?distM";
+            $groupby = $sort;
+
+        } else {
+            $geo_binds = '';
+            $geo_select = '';
+            $geo_filter = '';
+            $geo_bind = '';
+            $sort = "?naam";
+            $groupby = '';
+        }
+
         return $this->SPARQL(
             '
 SELECT
@@ -40,38 +93,36 @@ SELECT
   (GROUP_CONCAT(DISTINCT STR(?ligging); SEPARATOR=", ") AS ?ligging_all)
 WHERE {
   {
-    # Step 1: pick identifiers that match your search constraints
-    SELECT DISTINCT ?identifier ?itemset ?naam ?type
-    WHERE {
+
+  SELECT DISTINCT ?identifier ?itemset ?naam ?distM
+    WHERE {' . $geo_binds . '
       ?identifier a gtm:Straat ;
-                  o:item_set ?itemset ;
+                  o:item_set ?itemset ; ' . $geo_select . '
                   sdo:name ?naam .
-
-' . $filterset . '
-
-      BIND(
-        IF(?itemset = <https://n2t.net/ark:/60537/biWGGg>, "heden", "verdwenen")
-        AS ?type
-      )
 
       OPTIONAL { ?identifier sdo:alternateName ?altname_filter }
 
-' . $search . '
+' . $filterset . $geo_filter . '
+
+' . $search . $geo_bind . '
 
     }
+    ORDER BY ' . $sort . '
+    LIMIT ' . $limit . ' OFFSET ' . $offset . '
   }
 
-  # Step 2: now fetch all optional triples for the matched identifiers
+  BIND(
+    IF(?itemset = <https://n2t.net/ark:/60537/biWGGg>, "heden", "verdwenen")
+    AS ?type
+  )
   OPTIONAL { ?identifier geo:hasGeometry/geo:asWKT ?geometry }
   OPTIONAL { ?identifier sdo:alternateName ?altname }
-
   OPTIONAL { ?identifier sdo:mentions ?vermeldingen }
   OPTIONAL { ?identifier gtm:genoemdNaar ?genoemd_naar }
   OPTIONAL { ?identifier gtm:ligging ?ligging }
 }
-GROUP BY ?identifier ?naam ?geometry ?type
-ORDER BY ?naam
-LIMIT ' . $limit . ' OFFSET ' . $offset
+GROUP BY ?identifier ?naam ?geometry ?type ' . $groupby . '
+ORDER BY ' . $sort
         );
     }
 

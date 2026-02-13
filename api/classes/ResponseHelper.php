@@ -57,4 +57,11 @@ class ResponseHelper
 
         return $value !== null ? (int)$value : null;
     }
+
+    public static function getFloatQueryParam($key, $default = null)
+    {
+        $value = self::getQueryParam($key, $default);
+
+        return $value !== null ? (float)$value : null;
+    }
 }

@@ -203,6 +203,7 @@ test_json_endpoint "GET" "$BASE_URL/straatnamen?geojson" 200 "Geef lijst van all
 test_json_endpoint "GET" "$BASE_URL/straatnamen?limit=10&offset=10" 200 "Geef lijst van 10 straatnamen (beginnende op index 10)"
 test_json_endpoint "GET" "$BASE_URL/straatnamen?q=achter" 200 "Geef lijst van straatnamen met zoekterm 'achter'"
 test_json_endpoint "GET" "$BASE_URL/straatnamen?q=xyz" 404 "Geef lijst van straatnamen met zoekterm 'xyz' die niet gevonden wordt"
+test_json_endpoint "GET" "$BASE_URL/straatnamen?limit=5&lat=52.00497413812719&lon=4.678175320942639" 200 "Geef lijst van 5 straatnamen dicht bij punt"
 
 # GET /afbeeldingen/{identifier}
 print_test_header "GET /afbeeldingen/{identifier}"

@@ -20,14 +20,14 @@ class DataService
         $this->cache = new CacheService();
     }
 
-    public function geoJsonStreets($q = null, $limit, $offset, $type): array
+    public function geoJsonStreets($q, $limit, $offset, $type, $lat = 0, $lon = 0): array
     {
         $geojson = [
             "type" => "FeatureCollection",
             "features" => []
         ];
 
-        $streets = $this->sparqlService->get_street_index($q, $limit, $offset, $type);
+        $streets = $this->sparqlService->get_street_index($q, $limit, $offset, $type, $lat, $lon);
         foreach ($streets as $street) {
             if (isset($street['geometry']['value'])) {
                 $feature = [
@@ -50,13 +50,13 @@ class DataService
 
     }
 
-    public function searchStreets($q = null, $limit, $offset, $type): array
+    public function searchStreets($q, $limit, $offset, $type, $lat = 0, $lon = 0): array
     {
         if (!empty($q)) {
             $q = preg_replace("/[^a-zA-Z\\- ']/", '', trim($q));
         }
         $streets = [];
-        foreach ($this->sparqlService->get_street_index($q, $limit, $offset, $type) as $street) {
+        foreach ($this->sparqlService->get_street_index($q, $limit, $offset, $type, $lat, $lon) as $street) {
             if (!empty($street['naam_alt']['value'])) {
                 $alt_names = explode('|', $street['naam_alt']['value']);
             } else {

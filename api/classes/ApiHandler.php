@@ -40,12 +40,14 @@ class ApiHandler
     private function searchStreetsGeoJson(array $params = []): void
     {
         try {
-            $q = ResponseHelper::getQueryParam('q');
+            $q = ResponseHelper::getQueryParam('q', '');
             $limit = ResponseHelper::getIntQueryParam('limit', 2000);
             $offset = ResponseHelper::getIntQueryParam('offset', 0);
             $type = ResponseHelper::getQueryParam('type', 'alle');
+            $lat = ResponseHelper::getFloatQueryParam('lat', 0);
+            $lon = ResponseHelper::getFloatQueryParam('lon', 0);
 
-            $polygonen = $this->dataService->geoJsonStreets($q, $limit, $offset, $type);
+            $polygonen = $this->dataService->geoJsonStreets($q, $limit, $offset, $type, $lat, $lon);
             ResponseHelper::geoJson($polygonen);
         } catch (Exception $e) {
             $this->logAndReturnError($e, 'getStreetsGeoJson');
@@ -55,11 +57,14 @@ class ApiHandler
     private function searchStreetsJson(array $params = []): void
     {
         try {
-            $q = ResponseHelper::getQueryParam('q');
+            $q = ResponseHelper::getQueryParam('q', '');
             $limit = ResponseHelper::getIntQueryParam('limit', 2000);
             $offset = ResponseHelper::getIntQueryParam('offset', 0);
             $type = ResponseHelper::getQueryParam('type', 'alle');
-            $result = $this->dataService->searchStreets($q, $limit, $offset, $type);
+            $lat = ResponseHelper::getFloatQueryParam('lat', 0);
+            $lon = ResponseHelper::getFloatQueryParam('lon', 0);
+
+            $result = $this->dataService->searchStreets($q, $limit, $offset, $type, $lat, $lon);
 
             if (empty($result['straten'])) {
                 ResponseHelper::error('Geen straten gevonden.', 404, 'NOT_FOUND');
