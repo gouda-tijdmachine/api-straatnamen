@@ -20,14 +20,14 @@ class DataService
         $this->cache = new CacheService();
     }
 
-    public function geoJsonStreets($q = null, $limit = 2000, $offset = 0): array
+    public function geoJsonStreets($q = null, $limit, $offset, $type): array
     {
         $geojson = [
             "type" => "FeatureCollection",
             "features" => []
         ];
 
-        $streets = $this->sparqlService->get_street_index($q, $limit, $offset);
+        $streets = $this->sparqlService->get_street_index($q, $limit, $offset, $type);
         foreach ($streets as $street) {
             if (isset($street['geometry']['value'])) {
                 $feature = [
@@ -35,6 +35,7 @@ class DataService
                     "properties" => [
                         "identifier" => $street['identifier']['value'],
                         "naam" => $street['naam']['value'],
+                        "naam_alt" => $street['naam_alt']['value'] ?? null,
                         "type" => $street['type']['value']
                     ]
                 ];
@@ -49,17 +50,22 @@ class DataService
 
     }
 
-    public function searchStreets($q = null, $limit = 2000, $offset = 0): array
+    public function searchStreets($q = null, $limit, $offset, $type): array
     {
         if (!empty($q)) {
             $q = preg_replace("/[^a-zA-Z\\- ']/", '', trim($q));
         }
         $streets = [];
-        foreach ($this->sparqlService->get_street_index($q, $limit, $offset) as $street) {
+        foreach ($this->sparqlService->get_street_index($q, $limit, $offset, $type) as $street) {
+            if (!empty($street['naam_alt']['value'])) {
+                $alt_names = explode('|', $street['naam_alt']['value']);
+            } else {
+                $alt_names = null;
+            }
             $streets[] = [
                 'identifier' => $street['identifier']['value'],
                 'naam' => $street['naam']['value'],
-                'naam_alt' => $street['naam_alt']['value'] ?? null,
+                'naam_alt' => $alt_names,
             ];
         }
 
@@ -77,8 +83,50 @@ class DataService
             return null;
         }
 
+        if (!empty($street[0]['geometry']['value'])) {
+            $multipoint = $this->geoPHP->load($street[0]['geometry']['value'], 'wkt');
+            $geometry = json_decode($multipoint->out('json'));
+        } else {
+            $geometry = null;
+        }
+
+        if (!empty($street[0]['alt_names_grouped']['value'])) {
+            $alt_names = explode('|', $street[0]['alt_names_grouped']['value']);
+        } else {
+            $alt_names = null;
+        }
+
+        $streetData = [
+            'identifier' => $straatidentifier,
+            'naam' => $street[0]['naam']['value'],
+            'alt_names' => $alt_names,
+            'genoemd_naar' => $street[0]['genoemd_naar']['value'],
+            'ligging' => $street[0]['ligging']['value'],
+            'vermeldingen' => $street[0]['vermeldingen']['value'],
+            'geometry' => $geometry,
+             'type' => $street[0]['type']['value'],
+        ];
+
+        return $streetData;
+    }
+
+    public function getImages($straatidentifier, $limit, $offset): ?array
+    {
+
+        $allphotos = $this->sparqlService->get_photos_street($straatidentifier, $limit, $offset);
+
+        if (empty($allphotos)) {
+            return [0,[]];
+        }
+        $aantalfotos = count($allphotos);
+
+        if ($aantalfotos > $offset) {
+            $partphotos = array_slice($allphotos, $offset, $limit);
+        } else {
+            return [$aantalfotos, []];
+        }
         $fotos = [];
-        foreach ($this->sparqlService->get_photos_street($straatidentifier) as $foto) {
+        foreach ($partphotos as $foto) {
             $fotos[] = [
                 'identifier' => $foto['identifier']['value'] ?? '',
                 'titel' => $foto['titel']['value'] ?? '',
@@ -93,26 +141,6 @@ class DataService
             ];
         }
 
-        if (!empty($street[0]['geometry']['value'])) {
-            $multipoint = $this->geoPHP->load($street[0]['geometry']['value'], 'wkt');
-            $geometry = json_decode($multipoint->out('json'));
-        } else {
-            $geometry = null;
-        }
-
-        $streetData = [
-            'identifier' => $straatidentifier,
-            'naam' => $street[0]['naam']['value'],
-            'alt_names' => $street[0]['alt_names']['value'],
-            'genoemd_naar' => $street[0]['genoemd_naar']['value'],
-            'ligging' => $street[0]['ligging']['value'],
-            'vermeldingen' => $street[0]['vermeldingen']['value'],
-            'geometry' => $geometry,
-             'type' => $street[0]['type']['value'],
-            'fotos' => $fotos
-        ];
-
-        return $streetData;
+        return [$aantalfotos,$fotos];
     }
-
 }

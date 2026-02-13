@@ -204,6 +204,13 @@ test_json_endpoint "GET" "$BASE_URL/straatnamen?limit=10&offset=10" 200 "Geef li
 test_json_endpoint "GET" "$BASE_URL/straatnamen?q=achter" 200 "Geef lijst van straatnamen met zoekterm 'achter'"
 test_json_endpoint "GET" "$BASE_URL/straatnamen?q=xyz" 404 "Geef lijst van straatnamen met zoekterm 'xyz' die niet gevonden wordt"
 
+# GET /afbeeldingen/{identifier}
+print_test_header "GET /afbeeldingen/{identifier}"
+test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q" 200 "Geef informatie over de Lombardsteeg (https://n2t.net/ark:/60537/bn4b1Q)"
+test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a" 404 "Geef informatie over een niet-bestaande straat"
+test_json_endpoint "GET" "$BASE_URL/afbeeldingen/test" 400 "Geef informatie over straat op basis van een ongeldige identifier"
+
+
 # ** HTTP check
 
 # Test undefined route (should serve docs.html)

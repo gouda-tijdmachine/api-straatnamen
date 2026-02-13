@@ -43,8 +43,9 @@ class ApiHandler
             $q = ResponseHelper::getQueryParam('q');
             $limit = ResponseHelper::getIntQueryParam('limit', 2000);
             $offset = ResponseHelper::getIntQueryParam('offset', 0);
+            $type = ResponseHelper::getQueryParam('type', 'alle');
 
-            $polygonen = $this->dataService->geoJsonStreets($q, $limit, $offset);
+            $polygonen = $this->dataService->geoJsonStreets($q, $limit, $offset, $type);
             ResponseHelper::geoJson($polygonen);
         } catch (Exception $e) {
             $this->logAndReturnError($e, 'getStreetsGeoJson');
@@ -57,8 +58,8 @@ class ApiHandler
             $q = ResponseHelper::getQueryParam('q');
             $limit = ResponseHelper::getIntQueryParam('limit', 2000);
             $offset = ResponseHelper::getIntQueryParam('offset', 0);
-
-            $result = $this->dataService->searchStreets($q, $limit, $offset);
+            $type = ResponseHelper::getQueryParam('type', 'alle');
+            $result = $this->dataService->searchStreets($q, $limit, $offset, $type);
 
             if (empty($result['straten'])) {
                 ResponseHelper::error('Geen straten gevonden.', 404, 'NOT_FOUND');
@@ -94,6 +95,33 @@ class ApiHandler
             ResponseHelper::json($street);
         } catch (Exception $e) {
             $this->logAndReturnError($e, 'getStreetById');
+        }
+    }
+
+    public function getImagesByStreetId(array $params): void
+    {
+        try {
+            $paramIdentifier = $params['identifier'] ?? null;
+            $identifier = (!empty($paramIdentifier) && $paramIdentifier !== '{identifier}')
+                ? $this->validateAndDecodeIdentifier($paramIdentifier)
+                : $this->validateAndDecodeIdentifier(ResponseHelper::getQueryParam('identifier'));
+            if ($identifier === null) {
+                return;
+            }
+            $limit = ResponseHelper::getIntQueryParam('limit', 25);
+            $offset = ResponseHelper::getIntQueryParam('offset', 0);
+
+            list($aantalimages, $images) = $this->dataService->getImages($identifier, $limit, $offset);
+
+            if ($aantalimages == 0) {
+                ResponseHelper::error('Straat niet gevonden.', 404, 'NOT_FOUND');
+
+                return;
+            }
+
+            ResponseHelper::json([ "aantal" => $aantalimages, "afbeeldingen" => $images ]);
+        } catch (Exception $e) {
+            $this->logAndReturnError($e, 'getImagesByStreetId');
         }
     }
 

@@ -11,33 +11,63 @@ class SparqlService
         $this->cache = new CacheService();
     }
 
-    public function get_street_index($q, $limit, $offset): array
+    public function get_street_index($q, $limit, $offset, $type): array
     {
         $search = '';
         if (!empty($q)) {
-            $search = '  FILTER regex(STR(?naam), "' . $q . '", "i")' . "\n";
+            $search = '      FILTER(
+        regex(STR(?naam), "' . $q . '", "i") ||
+        regex(STR(COALESCE(?altname_filter, "")), "' . $q . '", "i")
+      )' . "\n";
         }
+
+        $sets = [];
+        if ($type === 'huidig' || $type === 'alle') {
+            $sets[] = '<https://n2t.net/ark:/60537/biWGGg>';
+        }
+        if ($type === 'verdwenen' || $type === 'alle') {
+            $sets[] = '<https://n2t.net/ark:/60537/bd75pg>';
+        }
+        $filterset = '      FILTER(?itemset IN (' . implode(", ", $sets) . '))';
 
         return $this->SPARQL(
             '
-SELECT ?identifier ?naam ?geometry ?type (GROUP_CONCAT(DISTINCT ?altname;
-    separator=", ") AS ?naam_alt) WHERE {
-  ?identifier a gtm:Straat;
-              o:item_set ?itemset ;
-              sdo:name ?naam .
-  FILTER(?itemset IN (
-    <https://n2t.net/ark:/60537/biWGGg>,
-    <https://n2t.net/ark:/60537/bd75pg>
-  ))
+SELECT
+  ?identifier ?naam ?geometry ?type
+  (GROUP_CONCAT(DISTINCT STR(?altname); SEPARATOR=", ") AS ?naam_alt)
+  (GROUP_CONCAT(DISTINCT STR(?vermeldingen); SEPARATOR=", ") AS ?vermeldingen_all)
+  (GROUP_CONCAT(DISTINCT STR(?genoemd_naar); SEPARATOR=", ") AS ?genoemd_naar_all)
+  (GROUP_CONCAT(DISTINCT STR(?ligging); SEPARATOR=", ") AS ?ligging_all)
+WHERE {
+  {
+    # Step 1: pick identifiers that match your search constraints
+    SELECT DISTINCT ?identifier ?itemset ?naam ?type
+    WHERE {
+      ?identifier a gtm:Straat ;
+                  o:item_set ?itemset ;
+                  sdo:name ?naam .
 
-  BIND(
-    IF(?itemset = <https://n2t.net/ark:/60537/biWGGg>, "heden", "verdwenen")
-    AS ?type
-  )
+' . $filterset . '
 
-' . $search . '              
+      BIND(
+        IF(?itemset = <https://n2t.net/ark:/60537/biWGGg>, "heden", "verdwenen")
+        AS ?type
+      )
+
+      OPTIONAL { ?identifier sdo:alternateName ?altname_filter }
+
+' . $search . '
+
+    }
+  }
+
+  # Step 2: now fetch all optional triples for the matched identifiers
   OPTIONAL { ?identifier geo:hasGeometry/geo:asWKT ?geometry }
   OPTIONAL { ?identifier sdo:alternateName ?altname }
+
+  OPTIONAL { ?identifier sdo:mentions ?vermeldingen }
+  OPTIONAL { ?identifier gtm:genoemdNaar ?genoemd_naar }
+  OPTIONAL { ?identifier gtm:ligging ?ligging }
 }
 GROUP BY ?identifier ?naam ?geometry ?type
 ORDER BY ?naam
@@ -48,7 +78,7 @@ LIMIT ' . $limit . ' OFFSET ' . $offset
     public function get_street($streetidentifier): array
     {
         return $this->SPARQL('
-SELECT * WHERE {
+SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?geometry (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) WHERE {
   BIND(<' . $streetidentifier . '> AS ?identifier)
   ?identifier a gtm:Straat ;
               o:item_set ?itemset ;
@@ -78,11 +108,12 @@ SELECT * WHERE {
   OPTIONAL {
     ?identifier sdo:alternateName ?alt_names 
   }
-}
+} 
+GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?geometry
 ');
     }
 
-    public function get_photos_street($streetidentifier, $limit = 50): array
+    public function get_photos_street($streetidentifier): array
     {
         return $this->SPARQL(
             '
@@ -98,7 +129,7 @@ SELECT * WHERE {
     OPTIONAL { ?identifier sdo:creator ?vervaardiger }  
 }
 ORDER BY ASC(?datering) ?titel
-LIMIT ' . $limit
+'
         );
     }
 

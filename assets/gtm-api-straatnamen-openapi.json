@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
-        "description": "Deze [getestte](qa-results) read-only REST API voorziet in de informatiebehoefte qua straatnamen en foto's van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
+        "description": "Deze [getestte](qa-results) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
         "version": "v1.1.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
@@ -56,6 +56,21 @@
                             "type": "integer",
                             "format": "int32",
                             "default": 0
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter straten op type (huidig, verdwenen of alle).",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "huidig",
+                                "verdwenen",
+                                "alle"
+                            ],
+                            "default": "alle"
                         }
                     }
                 ],
@@ -126,8 +141,8 @@
         "/straatnamen/{identifier}": {
             "get": {
                 "operationId": "getStreetById",
-                "summary": "Geef detailinformatie over een straat",
-                "description": "Geeft informatie over de gespecificeerde straat, inclusief geometrie en gerelateerde foto's.",
+                "summary": "Informatie over een straatnaam",
+                "description": "Geeft informatie over de gespecificeerde straat, inclusief geometrie.",
                 "parameters": [
                     {
                         "name": "identifier",
@@ -147,6 +162,87 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Straat"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missende of ongeldige identifier."
+                    },
+                    "404": {
+                        "description": "Straat niet gevonden."
+                    },
+                    "default": {
+                        "description": "Er heeft zich een onverwachte fout voorgedaan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/afbeeldingen/{identifier}": {
+            "get": {
+                "operationId": "getImagesByStreetId",
+                "summary": "Aan een straat gekoppelde afbeeldingen",
+                "description": "Geeft informatie over de aan een straat gekoppelde afbeeldingen, waaronder de IIIF URL.",
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Identifier van de straat. **Let op**: de identifier is een URI, deze moet correct ge-URL-encoded worden als path parameter.",
+                        "required": true,
+                        "example": "https://n2t.net/ark:/60537/bN5GSH",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Het maximum aantal afbeeldingen dat geretourneerd moet worden.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 25
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Het aantal afbeeldingen om over te slaan.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succesvolle response met afbeeldingen data.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "panden": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Afbeeldingen"
+                                            }
+                                        },
+                                        "aantal": {
+                                            "type": "integer",
+                                            "description": "Totaal aantal gevonden afbeeldingen."
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -218,7 +314,7 @@
                     "identifier": {
                         "type": "string",
                         "format": "uri",
-                        "description": "De persistente HTTP URI van de foto(beschrijving).",
+                        "description": "De persistente HTTP URI van de beschrijving van de afbeelding.",
                         "example": "https://n2t.net/ark:/60537/bjMurf"
                     },
                     "naam": {
@@ -227,9 +323,17 @@
                         "description": "De straatnaam."
                     },
                     "alt_names": {
-                        "type": "string",
-                        "example": "Waaistraat, Wijtstraet, Wytstraat, Twistraete",
-                        "description": "Een komma gescheiden lijst van alternatieve namen en/of schrijfwijzen voor de straat."
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Waaistraat",
+                            "Wijtstraet",
+                            "Wytstraat",
+                            "Twistraete"
+                        ],
+                        "description": "Een lijst van alternatieve namen en/of schrijfwijzen voor de straat."
                     },
                     "genoemd_naar": {
                         "type": "string",
@@ -248,12 +352,6 @@
                     },
                     "geometry": {
                         "$ref": "#/components/schemas/GeoJSONGeometry"
-                    },
-                    "fotos": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/FotoIndex"
-                        }
                     }
                 }
             },
@@ -278,13 +376,26 @@
                     }
                 }
             },
-            "FotoIndex": {
+            "Afbeeldingen": {
+                "type": "object",
+                "properties": {
+                    "aantal": {
+                        "type": "integer",
+                        "description": "Aantal afbeeldingen voor gespecificeerde straatnaam.",
+                        "example": "https://n2t.net/ark:/60537/b5PMTR"
+                    },
+                    "afbeeldingen": {
+                        "$ref": "#/components/schemas/Afbeelding"
+                    }
+                }
+            },
+            "Afbeelding": {
                 "type": "object",
                 "properties": {
                     "identifier": {
                         "type": "string",
                         "format": "uri",
-                        "description": "De persistente HTTP URI van de foto(beschrijving).",
+                        "description": "De persistente HTTP URI van de beschrijving van de afbeelding.",
                         "example": "https://n2t.net/ark:/60537/b5PMTR"
                     },
                     "titel": {
@@ -311,7 +422,7 @@
                     "bronorganisatie": {
                         "type": "string",
                         "example": "Streekarchief Midden-Holland",
-                        "description": "De organisatie die de foto in haar collectie heeft, bijv. Streekarchief Midden-Holland (SAMH) of Rijkdienst voor het Cultureel Erfgoed (RCE)."
+                        "description": "De organisatie die de afbeelding in haar collectie heeft, bijv. Streekarchief Midden-Holland (SAMH) of Rijkdienst voor het Cultureel Erfgoed (RCE)."
                     }
                 }
             },

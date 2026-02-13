@@ -22,6 +22,7 @@ $apiHandler = new ApiHandler();
 
 $router->get('/straatnamen/{identifier}', [$apiHandler, 'getStreetById']);
 $router->get('/straatnamen', [$apiHandler, 'searchStreets']);
+$router->get('/afbeeldingen/{identifier}', [$apiHandler, 'getImagesByStreetId']);
 $router->post('/clear_cache', [$apiHandler, 'clearCache']);
 
 try {
