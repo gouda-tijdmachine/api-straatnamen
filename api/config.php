@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 define('CACHE_DURATION_SECONDS', 1209600);  // 14 dagen = 14*24*3600 seconden
 define('CACHE_ENABLED', true);
-define('SPARQL_ENDPOINT', 'https://www.goudatijdmachine.nl/sparql11');
+define('SPARQL_ENDPOINT', 'https://sparql.goudatijdmachine.nl');
 define('SPARQL_CURL_UA', 'api-straatnamen');
 define('SPARQL_LOG', 0);
 
@@ -34,3 +34,4 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 // Send logs to stderr
 // ini_set('log_errors', '1');
 // ini_set('error_log', 'php://stderr');
+
