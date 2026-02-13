@@ -100,9 +100,9 @@ class DataService
             'identifier' => $straatidentifier,
             'naam' => $street[0]['naam']['value'],
             'alt_names' => $alt_names,
-            'genoemd_naar' => $street[0]['genoemd_naar']['value'],
-            'ligging' => $street[0]['ligging']['value'],
-            'vermeldingen' => $street[0]['vermeldingen']['value'],
+            'genoemd_naar' => $street[0]['genoemd_naar']['value'] ?? null,
+            'ligging' => $street[0]['ligging']['value'] ?? null,
+            'vermeldingen' => $street[0]['vermeldingen']['value'] ?? null,
             'geometry' => $geometry,
              'type' => $street[0]['type']['value'],
         ];
