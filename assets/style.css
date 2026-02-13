@@ -1,0 +1,40 @@
+html {
+    box-sizing: border-box;
+    overflow: -moz-scrollbars-vertical;
+    overflow-y: scroll;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+.topbar {
+    display: none;
+}
+
+body {
+    margin: 0;
+    background: #fafafa;
+}
+
+.swagger-ui .copy-to-clipboard button,
+.swagger-ui .info .title small {
+    background-color: #3891b1;
+}
+
+.swagger-ui .info {
+    margin-top: 1em !important;
+}
+
+.version,
+.version-stamp {
+    line-height: 1.2em;
+}
+
+h2 {
+    background: url("gtm-logo-2025.svg") no-repeat right center;
+    background-size: 100px auto;
+    line-height: 100px;
+}

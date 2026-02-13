@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Straatnamen API testresultaten &raquo; Gouda Tijdmachine</title>
+    <link rel="stylesheet" type="text/css" href="https://www.goudatijdmachine.nl/api-straatnamen/assets/swagger-ui.css" >
+    <style>
+    html { box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; }
+    body { margin:0 6vw; background: #fafafa; font-family: sans-serif; padding:10px}
+    h1 { background: url("https://www.goudatijdmachine.nl/api-straatnamen/assets/gtm-logo-2025.svg") no-repeat right center; background-size: 100px auto; line-height: 100px; font-size:36px}
+    h2 { color: #3795ad;margin:2em 0 1em 0}
+    a, a:visited { color: #3795ad; text-decoration: none}
+    h3 { padding-top:1em }
+    ul { line-height: 1.5em }
+    .fail { border-left:5px solid red }
+    .pass { border-left:5px solid green }
+    xmp { white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; width: 100%; box-sizing: border-box; max-height:100px; overflow-y:auto }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="https://www.goudatijdmachine.nl/api-straatnamen/assets/gtm-logo-2025.svg">
+</head>
+<body>
+<h1>Testresultaten <a href=".">Gouda Tijdmachine Straatnamen API</a></h1>
+<h2>Samenvatting: alle tests geslaagd</h2><ul class='pass'><li><strong>Basis URL</strong>: https://www.goudatijdmachine.nl/api-straatnamen<li><strong>Uitgevoerd</strong>: 08-02-2026 (18:23:31)</li><li><strong>Aantal tests</strong>: 15</li><li><strong>Geslaagd</strong>: 15</li><li><strong>Gefaald</strong>: 0</li></ul><p><br></p>
+
+<h2>GET /straatnamen/{identifier}</h2>
+<h3>Test 1: Geef informatie over de Lombardsteeg (https://n2t.net/ark:/60537/bn4b1Q)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 52ms (no cache) / 47ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bn4b1Q","naam":"Lombardsteeg","alt_names":"Lombaardsteeg","genoemd_naar":"Genoemd naar de Bank van Lening (Lombard of lommerd), die in de zestiende eeuw was gevestigd op de hoek van deze steeg en Achter 
+...
+</xmp></li>
+</ul>
+<h3>Test 2: Geef informatie over een niet-bestaande straat</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a</a></li>
+<li><strong>Response code</strong>: 404 (expected 404)</li>
+<li><strong>Response time</strong>: 47ms (no cache) / 48ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{
+    "code": "NOT_FOUND",
+    "message": "Straat niet gevonden."
+}
+</xmp></li>
+</ul>
+<h3>Test 3: Geef informatie over straat op basis van een ongeldige identifier</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/test>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/test</a></li>
+<li><strong>Response code</strong>: 400 (expected 400)</li>
+<li><strong>Response time</strong>: 72ms (no cache) / 59ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{
+    "code": "INVALID_IDENTIFIER",
+    "message": "Missende of ongeldige identifier."
+}
+</xmp></li>
+</ul>
+<h2>GET /straatnamen</h2>
+<h3>Test 4: Geef een lijst van straten (in JSON)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 46ms (no cache) / 55ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bngV1Z","naam":"'t Groene Eiland","naam_alt":"Het Groene Eiland"},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/boWudU","naam":"'t Oude Halletje","naam_alt":"Oude Halletje, t Oude Halletje, 
+...
+</xmp></li>
+</ul>
+<h3>Test 5: Geef lijst van alle straatnamen (in GeoJSON)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?geojson>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?geojson</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 109ms (no cache) / 144ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bngV1Z","naam":"'t Groene Eiland","type":"heden"},"geometry":{"type":"MultiLineString","coordinates":[[[4.7077113,52.0344798],[4.707
+...
+</xmp></li>
+</ul>
+<h3>Test 6: Geef lijst van 10 straatnamen (beginnende op index 10)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?limit=10&offset=10>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?limit=10&offset=10</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 51ms (no cache) / 45ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bms6OW","naam":"Aaltje Bakstraat","naam_alt":null},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/b7vgEo","naam":"Aardappelkade","naam_alt":null},{"identifier":"https:\/\/n2t.net\/ark:\/60537
+...
+</xmp></li>
+</ul>
+<h3>Test 7: Geef lijst van straatnamen met zoekterm 'achter'</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?q=achter>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?q=achter</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 51ms (no cache) / 49ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bfq1U7","naam":"Achter 't Swarte Paart","naam_alt":null},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bXhYFo","naam":"Achter de Boomgaard","naam_alt":null},{"identifier":"https:\/\/n2t.net\
+...
+</xmp></li>
+</ul>
+<h3>Test 8: Geef lijst van straatnamen met zoekterm 'xyz' die niet gevonden wordt</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?q=xyz>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?q=xyz</a></li>
+<li><strong>Response code</strong>: 404 (expected 404)</li>
+<li><strong>Response time</strong>: 50ms (no cache) / 46ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{
+    "code": "NOT_FOUND",
+    "message": "Geen straten gevonden."
+}
+</xmp></li>
+</ul>
+<h2>HTTP check - Documentatie</h2>
+<h3>Test 9: Ongedefineerde route moet leiden naar documentatie</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/undefined-route>https://www.goudatijdmachine.nl/api-straatnamen/undefined-route</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 48ms (no cache) / 74ms (with cache)</li>
+</ul>
+<h2>HTTP check - CORS</h2>
+<h3>Test 10: OPTIONS request</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: OPTIONS <a href=https://www.goudatijdmachine.nl/api-straatnamen/straten>https://www.goudatijdmachine.nl/api-straatnamen/straten</a></li>
+<li><strong>Response code</strong>: 204 (expected 204)</li>
+<li><strong>Response time</strong>: 47ms (no cache) / 49ms (with cache)</li>
+</ul>
+<h2>HTTP check - Test SAMH links</h2>
+<h3>Test 11: IIIF Image API</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://images.memorix.nl/sahm/iiif/c8a7c04c-a2b4-99cf-3999-18d6b6478563/info.json>https://images.memorix.nl/sahm/iiif/c8a7c04c-a2b4-99cf-3999-18d6b6478563/info.json</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 71ms (no cache) / 85ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{"@context":"http:\/\/iiif.io\/api\/image\/2\/context.json","protocol":"http:\/\/iiif.io\/api\/image","width":2681,"height":1996,"sizes":[{"width":168,"height":125},{"width":336,"height":250},{"width":671,"height":499},{"width":1341,"height":998}],"t
+...
+</xmp></li>
+</ul>
+<h3>Test 12: SAMH beeldbank</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://samh.nl/bronnen/beeldbank/detail/0a6ffb0c-7959-70e8-d995-4bc3a1d0d9df/media/c8a7c04c-a2b4-99cf-3999-18d6b6478563>https://samh.nl/bronnen/beeldbank/detail/0a6ffb0c-7959-70e8-d995-4bc3a1d0d9df/media/c8a7c04c-a2b4-99cf-3999-18d6b6478563</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 239ms (no cache) / 170ms (with cache)</li>
+</ul>
+<h3>Test 13: SAMH akte pagina</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://samh.nl/bronnen/genealogie/deeds/a634024a-cac3-98ba-3d4f-77a5e270a5ec>https://samh.nl/bronnen/genealogie/deeds/a634024a-cac3-98ba-3d4f-77a5e270a5ec</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 234ms (no cache) / 166ms (with cache)</li>
+</ul>
+<h2>HTTP check - Test Omeka thumbnails</h2>
+<h3>Test 14: Omeka thumbnail 1 die bestaat</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/omeka/files/medium/05a057c0734aeb68e67b609a35473ec977521a1f.jpg>https://www.goudatijdmachine.nl/omeka/files/medium/05a057c0734aeb68e67b609a35473ec977521a1f.jpg</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 46ms (no cache) / 53ms (with cache)</li>
+</ul>
+<h3>Test 15: Omeka thumbnail 2 die niet bestaat</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/omeka/files/medium/f166c8fbec016f567150983214a2c46e99177c1e.jpg>https://www.goudatijdmachine.nl/omeka/files/medium/f166c8fbec016f567150983214a2c46e99177c1e.jpg</a></li>
+<li><strong>Response code</strong>: 404 (expected 404)</li>
+<li><strong>Response time</strong>: 157ms (no cache) / 163ms (with cache)</li>
+</ul>
+</body></html>

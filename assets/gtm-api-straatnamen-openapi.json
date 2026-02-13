@@ -1,0 +1,423 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Gouda Tijdmachine Straatnamen API",
+        "description": "Deze [getestte](qa-results) read-only REST API voorziet in de informatiebehoefte qua straatnamen en foto's van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
+        "version": "v1.1.0",
+        "contact": {
+            "name": "Gouda Tijdmachine Straatnamen",
+            "url": "https://www.goudatijdmachine.nl/straatnamen/"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://www.goudatijdmachine.nl/api-straatnamen",
+            "description": "API @ Coret infra"
+        },
+        {
+            "url": "https://api-straatnamen.goudatijdmachine.nl",
+            "description": "API @ Vercel infra"
+        }
+    ],
+    "paths": {
+        "/straatnamen": {
+            "get": {
+                "operationId": "searchStreets",
+                "summary": "Lijst met straten (JSON of GeoJSON)",
+                "description": "Geeft een set van straten. Gebruik de `Accept` header om te schakelen tussen een standaard overzicht (`application/json`) of geografische features (`application/geo+json`). Wanneer Accept headers niet mogelijk is kan ?geojson worden toegevoegd aan de API call.",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "description": "De te zoeken term in de straatnaam.",
+                        "in": "query",
+                        "required": false,
+                        "example": "achter",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Het maximum aantal straten dat geretourneerd moet worden.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 2000
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Het aantal straten om over te slaan.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succesvolle response met straten data.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "panden": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/StraatIndex"
+                                            }
+                                        },
+                                        "aantal": {
+                                            "type": "integer",
+                                            "description": "Totaal aantal gevonden straten."
+                                        }
+                                    }
+                                }
+                            },
+                            "application/geo+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "FeatureCollection"
+                                            ]
+                                        },
+                                        "features": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/GeoJSONFeature"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Geen straten gevonden."
+                    },
+                    "406": {
+                        "description": "Ongeldige accept header."
+                    },
+                    "422": {
+                        "description": "Ongeldige zoekvraag."
+                    },
+                    "default": {
+                        "description": "Er heeft zich een onverwachte fout voorgedaan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/straatnamen/{identifier}": {
+            "get": {
+                "operationId": "getStreetById",
+                "summary": "Geef detailinformatie over een straat",
+                "description": "Geeft informatie over de gespecificeerde straat, inclusief geometrie en gerelateerde foto's.",
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Identifier van de straat. **Let op**: de identifier is een URI, deze moet correct ge-URL-encoded worden als path parameter.",
+                        "required": true,
+                        "example": "https://n2t.net/ark:/60537/bN5GSH",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Informatie over de straat.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Straat"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missende of ongeldige identifier."
+                    },
+                    "404": {
+                        "description": "Straat niet gevonden."
+                    },
+                    "default": {
+                        "description": "Er heeft zich een onverwachte fout voorgedaan.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ClearCacheResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true,
+                        "description": "Geeft aan of de cache operatie succesvol was."
+                    },
+                    "deleted_files": {
+                        "type": "integer",
+                        "example": 847,
+                        "description": "Het aantal verwijderde cache bestanden."
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Successfully cleared 847 cache files",
+                        "description": "Een beschrijving van het resultaat."
+                    },
+                    "errors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Eventuele foutmeldingen tijdens het wissen van de cache."
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "description": "Beschrijving van een foutmelding.",
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Straat": {
+                "type": "object",
+                "properties": {
+                    "identifier": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "De persistente HTTP URI van de foto(beschrijving).",
+                        "example": "https://n2t.net/ark:/60537/bjMurf"
+                    },
+                    "naam": {
+                        "type": "string",
+                        "example": "Wijdstraat",
+                        "description": "De straatnaam."
+                    },
+                    "alt_names": {
+                        "type": "string",
+                        "example": "Waaistraat, Wijtstraet, Wytstraat, Twistraete",
+                        "description": "Een komma gescheiden lijst van alternatieve namen en/of schrijfwijzen voor de straat."
+                    },
+                    "genoemd_naar": {
+                        "type": "string",
+                        "example": "Genoemd naar de tweesprong die werd gevormd door de Tiendeweg (vóór de verlegging ten gerieve van de bouw van de Sint-Janskerk) en het verlengde van de Kleiweg. De oorspronkelijke naam van de straat was ook Twistrate, wat een straat met een tweesprong betekent. In het midden van de vijftiende eeuw is de naam verbasterd tot Wijdstraat.",
+                        "description": "Beschrijving van waar of naar wie de straat is genoemd."
+                    },
+                    "ligging": {
+                        "type": "string",
+                        "example": "van de Markt naar de Dubbele Buurt en de Lage Gouwe",
+                        "description": "De ligging van de straat."
+                    },
+                    "vermeldingen": {
+                        "type": "string",
+                        "example": "B&W besluit, nummer 17651 (2-12-1980)",
+                        "description": "Officieel stuk waarin de straat is vermeld, zoals een raadsbesluit."
+                    },
+                    "geometry": {
+                        "$ref": "#/components/schemas/GeoJSONGeometry"
+                    },
+                    "fotos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FotoIndex"
+                        }
+                    }
+                }
+            },
+            "StraatIndex": {
+                "type": "object",
+                "properties": {
+                    "identifier": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "De persistente HTTP URI van de straat.",
+                        "example": "https://n2t.net/ark:/60537/b5PMTR"
+                    },
+                    "naam": {
+                        "type": "string",
+                        "example": "Wijdstraat",
+                        "description": "De straatnaam."
+                    },
+                    "alt_names": {
+                        "type": "string",
+                        "example": "Waaistraat, Wijtstraet, Wytstraat, Twistraete",
+                        "description": "Een komma gescheiden lijst van alternatieve namen en/of schrijfwijzen voor de straat."
+                    }
+                }
+            },
+            "FotoIndex": {
+                "type": "object",
+                "properties": {
+                    "identifier": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "De persistente HTTP URI van de foto(beschrijving).",
+                        "example": "https://n2t.net/ark:/60537/b5PMTR"
+                    },
+                    "titel": {
+                        "type": "string",
+                        "example": "Wijdstraat, tabakswinkel Van Vreumingen, Sinterklaasetalage",
+                        "description": "De titel van de afbeelding, veelal meer de vorm van een lange beschrijving dan een kort titel."
+                    },
+                    "thumbnail": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://www.goudatijdmachine.nl/omeka/files/medium/70d726f9642726c3e7a0080536cc43715fe8e025.jpg",
+                        "description": "Een kleine weergave van de afbeelding (veelal 200 pixels bij landschapsformaat en 200px hoog bij portretformaat."
+                    },
+                    "vervaardiger": {
+                        "type": "string",
+                        "example": "Daems, H.J.",
+                        "description": "De naam van de maker van de afbeelding."
+                    },
+                    "datering": {
+                        "type": "string",
+                        "example": "1950",
+                        "description": "Het jaar waarin de afbeelding is gemaakt."
+                    },
+                    "bronorganisatie": {
+                        "type": "string",
+                        "example": "Streekarchief Midden-Holland",
+                        "description": "De organisatie die de foto in haar collectie heeft, bijv. Streekarchief Midden-Holland (SAMH) of Rijkdienst voor het Cultureel Erfgoed (RCE)."
+                    }
+                }
+            },
+            "GeoJSONFeature": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "Feature"
+                        ]
+                    },
+                    "geometry": {
+                        "$ref": "#/components/schemas/GeoJSONGeometry"
+                    },
+                    "properties": {
+                        "type": "object"
+                    }
+                }
+            },
+            "GeoJSONGeometry": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/GeoJSONPolygon"
+                    },
+                    {
+                        "$ref": "#/components/schemas/GeoJSONLineString"
+                    },
+                    {
+                        "$ref": "#/components/schemas/GeoJSONMultiLineString"
+                    }
+                ]
+            },
+            "GeoJSONPolygon": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "Polygon"
+                        ]
+                    },
+                    "coordinates": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "number",
+                                    "format": "double"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "GeoJSONLineString": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "LineString"
+                        ]
+                    },
+                    "coordinates": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "format": "double"
+                            },
+                            "minItems": 2
+                        }
+                    }
+                }
+            },
+            "GeoJSONMultiLineString": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "MultiLineString"
+                        ]
+                    },
+                    "coordinates": {
+                        "type": "array",
+                        "description": "An array of LineString coordinate arrays",
+                        "items": {
+                            "type": "array",
+                            "description": "A single LineString coordinate array",
+                            "items": {
+                                "type": "array",
+                                "description": "A single point [longitude, latitude]",
+                                "items": {
+                                    "type": "number",
+                                    "format": "double"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
