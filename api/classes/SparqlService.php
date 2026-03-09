@@ -98,9 +98,9 @@ WHERE {
     WHERE {' . $geo_binds . '
       ?identifier a gtm:Straat ;
                   o:item_set ?itemset ; ' . $geo_select . '
-                  sdo:name ?naam .
+                  schema:name ?naam .
 
-      OPTIONAL { ?identifier sdo:alternateName ?altname_filter }
+      OPTIONAL { ?identifier schema:alternateName ?altname_filter }
 
 ' . $filterset . $geo_filter . '
 
@@ -116,8 +116,8 @@ WHERE {
     AS ?type
   )
   OPTIONAL { ?identifier geo:hasGeometry/geo:asWKT ?geometry }
-  OPTIONAL { ?identifier sdo:alternateName ?altname }
-  OPTIONAL { ?identifier sdo:mentions ?vermeldingen }
+  OPTIONAL { ?identifier schema:alternateName ?altname }
+  OPTIONAL { ?identifier schema:mentions ?vermeldingen }
   OPTIONAL { ?identifier gtm:genoemdNaar ?genoemd_naar }
   OPTIONAL { ?identifier gtm:ligging ?ligging }
 }
@@ -133,7 +133,7 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?ge
   BIND(<' . $streetidentifier . '> AS ?identifier)
   ?identifier a gtm:Straat ;
               o:item_set ?itemset ;
-              sdo:name ?naam .
+              schema:name ?naam .
   FILTER(?itemset IN (
     <https://n2t.net/ark:/60537/biWGGg>,
     <https://n2t.net/ark:/60537/bd75pg>
@@ -145,7 +145,7 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?ge
   )
 
   OPTIONAL {
-    ?identifier sdo:mentions ?vermeldingen  
+    ?identifier schema:mentions ?vermeldingen  
   }
   OPTIONAL {
     ?identifier gtm:genoemdNaar ?genoemd_naar 
@@ -157,7 +157,7 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?ge
     ?identifier geo:hasGeometry/geo:asWKT ?geometry 
   }
   OPTIONAL {
-    ?identifier sdo:alternateName ?alt_names 
+    ?identifier schema:alternateName ?alt_names 
   }
 } 
 GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?geometry
@@ -170,14 +170,14 @@ GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?
             '
 SELECT * WHERE {
   BIND( <' . $streetidentifier . '> AS ?straat)
-    ?identifier sdo:spatialCoverage/gtm:straat ?straat ;
-      sdo:name ?titel ;
-      sdo:url ?url ;
-      sdo:dateCreated/rico:hasBeginningDate/rico:normalizedDateValue ?datering ;
+    ?identifier schema:spatialCoverage/gtm:straat ?straat ;
+      schema:name ?titel ;
+      schema:url ?url ;
+      schema:dateCreated/rico:hasBeginningDate/rico:normalizedDateValue ?datering ;
       o:primary_media/o:source ?iiif_info_json ;
-      o:media/sdo:thumbnailUrl ?thumbnail .
+      o:media/schema:thumbnailUrl ?thumbnail .
     OPTIONAL { ?identifier gtm:informatieAuteursRechten ?informatie_auteursrechten }
-    OPTIONAL { ?identifier sdo:creator ?vervaardiger }  
+    OPTIONAL { ?identifier schema:creator ?vervaardiger }  
 }
 ORDER BY ASC(?datering) ?titel
 '

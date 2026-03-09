@@ -20,7 +20,7 @@ PREFIX picom: <https://personsincontext.org/model#>
 PREFIX pnv: <https://w3id.org/pnv#>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX roar: <https://w3id.org/roar#>
-PREFIX sdo: <https://schema.org/>
+PREFIX schema: <http://schema.org/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
