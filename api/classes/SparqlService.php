@@ -11,7 +11,7 @@ class SparqlService
         $this->cache = new CacheService();
     }
 
-    public function get_street_index(string $q = "", int $limit, int $offset, string $type, float $lat = 0, float $lon = 0): array
+    public function get_street_index(string $q = "", int $limit = 0, int $offset = 0, string $type = "", float $lat = 0, float $lon = 0): array
     {
         $search = '';
         if (!empty($q)) {
