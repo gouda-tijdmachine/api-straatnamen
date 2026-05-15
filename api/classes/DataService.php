@@ -52,9 +52,7 @@ class DataService
 
     public function searchStreets($q, $limit, $offset, $type, $lat = 0, $lon = 0): array
     {
-        if (!empty($q)) {
-            $q = preg_replace("/[^a-zA-Z\\- ']/", '', trim($q));
-        }
+        $q = trim($q);
         $streets = [];
         foreach ($this->sparqlService->get_street_index($q, $limit, $offset, $type, $lat, $lon) as $street) {
             if (!empty($street['naam_alt']['value'])) {

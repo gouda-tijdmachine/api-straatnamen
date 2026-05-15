@@ -15,9 +15,10 @@ class SparqlService
     {
         $search = '';
         if (!empty($q)) {
+            $qEscaped = self::escapeForSparqlRegexLiteral($q);
             $search = '      FILTER(
-        regex(STR(?naam), "' . $q . '", "i") ||
-        regex(STR(COALESCE(?altname_filter, "")), "' . $q . '", "i")
+        regex(STR(?naam), "' . $qEscaped . '", "i") ||
+        regex(STR(COALESCE(?altname_filter, "")), "' . $qEscaped . '", "i")
       )' . "\n";
         }
 
@@ -266,6 +267,32 @@ ORDER BY ASC(?datering) ?titel
         }
 
         return $sparqlResult["results"]["bindings"] ?? [];
+    }
+
+    /**
+     * Escape user input for safe inclusion as a literal substring inside a
+     * SPARQL `regex(..., "<q>", "i")` call.
+     *
+     * Two passes: first escape XPath regex metacharacters so the input is matched
+     * literally (so a user-typed `.` doesn't act as "any char"), then escape the
+     * result for a SPARQL double-quoted string literal (\ and " plus control chars).
+     */
+    private static function escapeForSparqlRegexLiteral(string $q): string
+    {
+        $regexMeta = ['\\', '.', '+', '*', '?', '(', ')', '[', ']', '{', '}', '^', '$', '|', '-', '/'];
+        $regexEscaped = '';
+        $len = strlen($q);
+        for ($i = 0; $i < $len; $i++) {
+            $c = $q[$i];
+            $regexEscaped .= in_array($c, $regexMeta, true) ? '\\' . $c : $c;
+        }
+        return strtr($regexEscaped, [
+            '\\' => '\\\\',
+            '"'  => '\\"',
+            "\t" => '\\t',
+            "\n" => '\\n',
+            "\r" => '\\r',
+        ]);
     }
 
 }
