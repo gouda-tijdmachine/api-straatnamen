@@ -130,6 +130,37 @@ class ApiHandler
         }
     }
 
+    public function ping(array $params = []): void
+    {
+        ResponseHelper::json([
+            'time' => gmdate('c'),
+            'php' => PHP_VERSION,
+            'server_addr' => $_SERVER['SERVER_ADDR'] ?? null,
+            'egress_ipv4' => self::fetchEgress('https://api.ipify.org', CURL_IPRESOLVE_V4),
+            'egress_ipv6' => self::fetchEgress('https://api6.ipify.org', CURL_IPRESOLVE_V6),
+        ]);
+    }
+
+    private static function fetchEgress(string $url, int $ipResolve): ?string
+    {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_IPRESOLVE => $ipResolve,
+        ]);
+        $body = curl_exec($ch);
+        $err = curl_errno($ch) ? curl_error($ch) : null;
+        curl_close($ch);
+
+        if ($err !== null) {
+            return 'error: ' . $err;
+        }
+        $body = trim((string)$body);
+        return $body === '' ? null : $body;
+    }
+
     public function clearCache(array $params = []): void
     {
         try {
