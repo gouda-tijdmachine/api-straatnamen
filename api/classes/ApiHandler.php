@@ -138,6 +138,7 @@ class ApiHandler
             'server_addr' => $_SERVER['SERVER_ADDR'] ?? null,
             'egress_ipv4' => self::fetchEgress('https://api.ipify.org', CURL_IPRESOLVE_V4),
             'egress_ipv6' => self::fetchEgress('https://api6.ipify.org', CURL_IPRESOLVE_V6),
+            'sparql_probe' => self::probeSparql(),
         ]);
     }
 
@@ -159,6 +160,37 @@ class ApiHandler
         }
         $body = trim((string)$body);
         return $body === '' ? null : $body;
+    }
+
+    private static function probeSparql(): array
+    {
+        $url = defined('SPARQL_ENDPOINT') ? SPARQL_ENDPOINT : 'https://sparql.goudatijdmachine.nl';
+        $start = microtime(true);
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_NOBODY => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+        ]);
+        curl_exec($ch);
+        $err = curl_errno($ch) ? curl_error($ch) : null;
+        $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $primaryIp = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
+        $connectMs = (int)round(((float)curl_getinfo($ch, CURLINFO_CONNECT_TIME)) * 1000);
+        $totalMs = (int)round((microtime(true) - $start) * 1000);
+        curl_close($ch);
+
+        return [
+            'url' => $url,
+            'resolved_ip' => $primaryIp ?: null,
+            'http' => $status ?: null,
+            'error' => $err,
+            'connect_ms' => $connectMs,
+            'total_ms' => $totalMs,
+        ];
     }
 
     public function clearCache(array $params = []): void
