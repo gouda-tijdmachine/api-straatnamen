@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 define('CACHE_DURATION_SECONDS', 1209600);  // 14 dagen = 14*24*3600 seconden
 define('CACHE_ENABLED', true);
+define('CACHE_REDIS_DATABASE', 3);
 define('SPARQL_ENDPOINT', 'https://sparql.goudatijdmachine.nl');
 define('SPARQL_CURL_UA', 'api-straatnamen');
 define('SPARQL_LOG', 0);

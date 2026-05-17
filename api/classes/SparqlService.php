@@ -176,7 +176,9 @@ SELECT * WHERE {
       schema:url ?url ;
       schema:dateCreated/rico:hasBeginningDate/rico:normalizedDateValue ?datering ;
       o:primary_media/o:source ?iiif_info_json ;
-      o:media/schema:thumbnailUrl ?thumbnail .
+      #o:media/schema:thumbnailUrl ?thumbnail ;
+      o:media/o:thumbnail_urls/o:square ?thumbnail .
+
     OPTIONAL { ?identifier gtm:informatieAuteursRechten ?informatie_auteursrechten }
     OPTIONAL { ?identifier schema:creator ?vervaardiger }  
 }
@@ -192,17 +194,20 @@ ORDER BY ASC(?datering) ?titel
         if ($offset > 0) {
             $sparqlQueryString .= " OFFSET " . $offset;
         }
-        $url = SPARQL_ENDPOINT . '?query=' . urlencode($sparqlQueryString);
+        // POST, not GET: the upstream WAF rejects any GET whose query string
+        // contains the keyword "PREFIX" with a 403 HTML page.
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_URL, SPARQL_ENDPOINT);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['query' => $sparqlQueryString]));
         curl_setopt($ch, CURLOPT_USERAGENT, SPARQL_CURL_UA);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        $headers = ['Accept: application/sparql-results+json'];
-
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Accept: application/sparql-results+json',
+            'Content-Type: application/x-www-form-urlencoded',
+        ]);
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
@@ -212,7 +217,13 @@ ORDER BY ASC(?datering) ?titel
             return null;
         }
 
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
+        if ($status < 200 || $status >= 300) {
+            error_log("SPARQL call returned HTTP $status: " . substr((string)$response, 0, 200));
+            return null;
+        }
 
         return $response;
     }

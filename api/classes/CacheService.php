@@ -55,6 +55,10 @@ class CacheService
                 }
             }
 
+            if (defined('CACHE_REDIS_DATABASE')) {
+                $this->redis->select(CACHE_REDIS_DATABASE);
+            }
+
         } catch (Throwable $e) {
             echo "Connection failed: " . $e->getMessage();
         }
@@ -66,7 +70,7 @@ class CacheService
             return null;
         }
         try {
-            $value = $this->redis->get("API-VIEWER:$key");
+            $value = $this->redis->get("API-STRAAT:$key");
 
             return $value === false ? null : $value;
         } catch (Exception $e) {
@@ -83,7 +87,7 @@ class CacheService
         }
 
         try {
-            return $this->redis->setex("API-VIEWER:$key", $seconds, $value);
+            return $this->redis->setex("API-STRAAT:$key", $seconds, $value);
         } catch (Exception $e) {
             error_log("Local Redis Put Error: " . $e->getMessage());
 
