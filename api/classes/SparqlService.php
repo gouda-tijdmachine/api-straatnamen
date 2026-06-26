@@ -174,7 +174,7 @@ SELECT * WHERE {
     ?identifier schema:spatialCoverage/gtm:straat ?straat ;
       schema:name ?titel ;
       schema:url ?url ;
-      schema:dateCreated/rico:hasBeginningDate/rico:normalizedDateValue ?datering ;
+      schema:dateCreated ?datering ;
       o:primary_media/o:source ?iiif_info_json ;
       #o:media/schema:thumbnailUrl ?thumbnail ;
       o:media/o:thumbnail_urls/o:square ?thumbnail .
