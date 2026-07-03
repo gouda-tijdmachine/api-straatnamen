@@ -180,7 +180,7 @@ SELECT * WHERE {
       o:media/o:thumbnail_urls/o:square ?thumbnail .
 
     OPTIONAL { ?identifier gtm:informatieAuteursRechten ?informatie_auteursrechten }
-    OPTIONAL { ?identifier schema:creator ?vervaardiger }  
+    OPTIONAL { ?identifier schema:creator/schema:name ?vervaardiger }
 }
 ORDER BY ASC(?datering) ?titel
 '
