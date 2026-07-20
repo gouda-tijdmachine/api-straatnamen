@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
-        "description": "Deze [getestte](qa-results) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
+        "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
         "version": "v1.3.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
@@ -12,11 +12,11 @@
     "servers": [
         {
             "url": "https://api-straatnamen.goudatijdmachine.nl",
-            "description": "API @ Vercel infra"
+            "description": "Production API"
         },
         {
             "url": "https://www.goudatijdmachine.nl/api-straatnamen",
-            "description": "API @ Coret infra"
+            "description": "Development API"
         }
     ],
     "paths": {
@@ -371,6 +371,11 @@
                         "type": "string",
                         "example": "B&W besluit, nummer 17651 (2-12-1980)",
                         "description": "Officieel stuk waarin de straat is vermeld, zoals een raadsbesluit."
+                    },
+                    "problematisch": {
+                        "type": "string",
+                        "example": "Cornelis en Frederik de Houtman waren Goudse zeevaarders die reizen maakten naar Oost-Indië ...",
+                        "description": "Uitleg bij de straatnaam die naar hedendaagse opvattingen mogelijk niet door de beugel kan."
                     },
                     "geometry": {
                         "$ref": "#/components/schemas/GeoJSONGeometry"

@@ -101,6 +101,7 @@ class DataService
             'genoemd_naar' => $street[0]['genoemd_naar']['value'] ?? null,
             'ligging' => $street[0]['ligging']['value'] ?? null,
             'vermeldingen' => $street[0]['vermeldingen']['value'] ?? null,
+            'problematisch' => $street[0]['problematisch']['value'] ?? null,
             'geometry' => $geometry,
              'type' => $street[0]['type']['value'],
         ];

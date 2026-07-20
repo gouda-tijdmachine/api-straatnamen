@@ -130,7 +130,7 @@ ORDER BY ' . $sort
     public function get_street($streetidentifier): array
     {
         return $this->SPARQL('
-SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?geometry (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) WHERE {
+SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?problematisch ?geometry (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) WHERE {
   BIND(<' . $streetidentifier . '> AS ?identifier)
   ?identifier a gtm:Straat ;
               o:item_set ?itemset ;
@@ -152,16 +152,19 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?ge
     ?identifier gtm:genoemdNaar ?genoemd_naar 
   }
   OPTIONAL {
-    ?identifier gtm:ligging ?ligging 
+    ?identifier gtm:ligging ?ligging
   }
   OPTIONAL {
-    ?identifier geo:hasGeometry/geo:asWKT ?geometry 
+    ?identifier gtm:problematischeStraatnaam ?problematisch
+  }
+  OPTIONAL {
+    ?identifier geo:hasGeometry/geo:asWKT ?geometry
   }
   OPTIONAL {
     ?identifier schema:alternateName ?alt_names 
   }
 } 
-GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?geometry
+GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?problematisch ?geometry
 ');
     }
 
