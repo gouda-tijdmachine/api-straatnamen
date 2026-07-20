@@ -20,35 +20,58 @@
     <link rel="icon" type="image/svg+xml" href="https://www.goudatijdmachine.nl/api-straatnamen/assets/gtm-logo-2025.svg">
 </head>
 <body>
-<h1>Testresultaten <a href=".">Gouda Tijdmachine Straatnamen API</a></h1>
-<summary>
+<h1>Testresultaten Gouda Tijdmachine Straatnamen API</h1>
+<h2>Samenvatting: alle tests geslaagd</h2><ul class='pass'><li><strong>Basis URL</strong>: https://api-straatnamen.goudatijdmachine.nl<li><strong>Uitgevoerd</strong>: 20-07-2026 (15:23:58)</li><li><strong>Aantal tests</strong>: 55</li><li><strong>Geslaagd</strong>: 55</li><li><strong>Gefaald</strong>: 0</li></ul><p><br></p>
 
 <h2>GET /straatnamen/{identifier}</h2>
-<h3>Test 1: Geef informatie over de Lombardsteeg (https://n2t.net/ark:/60537/bn4b1Q)</h3>
+<h3>Test 1: Geef informatie over de Lombardsteeg (https://n2t.net/ark:/60537/bn4b1Q); valideer geometry + alt_names</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q>https://api-straatnamen.goudatijdmachine.nl/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 56ms (no cache) / 59ms (with cache)</li>
-<li><strong>Response body</strong>: <xmp>{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bn4b1Q","naam":"Lombardsteeg","alt_names":["Lombaardsteeg","Lombaarsteegje","Lombardsteegje","Lombartssteeg","Lombartssteegje","Lombartsteegje","Lombertssteech","Lombertsteech","Lommerts Steegje","Lommer
+<li><strong>Response time</strong>: 161ms (no cache) / 33ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.identifier and .naam and .type and (.geometry.type | IN("LineString","MultiLineString","Polygon")) and (.alt_names | type == "array")</code></li>
+<li><strong>Response body</strong>: <xmp>{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bn4b1Q","naam":"Lombardsteeg","alt_names":["Lombaarsteegje","Lombardsteegje","Lombartssteeg","Lombartssteegje","Lombartsteegje","Lombertdsteech","Lombertssteech","Lombertsteech","Lommerts Steegje","Lomme
 ...
 </xmp></li>
 </ul>
-<h3>Test 2: Geef informatie over een niet-bestaande straat</h3>
+<h3>Test 2: Geef informatie over het Houtmanspad (https://n2t.net/ark:/60537/b4N7Fm); valideer dat problematisch-veld een niet-lege uitleg bevat</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fb4N7Fm>https://api-straatnamen.goudatijdmachine.nl/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fb4N7Fm</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 124ms (no cache) / 48ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.identifier and .naam and (.problematisch | type == "string") and (.problematisch | length > 0)</code></li>
+<li><strong>Response body</strong>: <xmp>{"identifier":"https:\/\/n2t.net\/ark:\/60537\/b4N7Fm","naam":"Houtmanspad","alt_names":null,"genoemd_naar":"Genoemd naar zie Houtmansgracht.","ligging":"van de Houtmansgracht naar de Korte Vest","vermeldingen":"B&W besluit, nummer 2401 (2-03-1982)",
+...
+</xmp></li>
+</ul>
+<h3>Test 3: Geef informatie over een niet-bestaande straat</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a>https://api-straatnamen.goudatijdmachine.nl/straatnamen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 404 (expected 404)</li>
-<li><strong>Response time</strong>: 44ms (no cache) / 51ms (with cache)</li>
+<li><strong>Response time</strong>: 107ms (no cache) / 45ms (with cache)</li>
 <li><strong>Response body</strong>: <xmp>{
     "code": "NOT_FOUND",
     "message": "Straat niet gevonden."
 }
 </xmp></li>
 </ul>
-<h3>Test 3: Geef informatie over straat op basis van een ongeldige identifier</h3>
+<h3>Test 4: Geef informatie over straat op basis van een ongeldige identifier; foutbody bevat code+message</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/test>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen/test</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen/test>https://api-straatnamen.goudatijdmachine.nl/straatnamen/test</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 400 (expected 400)</li>
-<li><strong>Response time</strong>: 61ms (no cache) / 45ms (with cache)</li>
+<li><strong>Response time</strong>: 27ms (no cache) / 64ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.code == "INVALID_IDENTIFIER" and (.message | type == "string")</code></li>
+<li><strong>Response body</strong>: <xmp>{
+    "code": "INVALID_IDENTIFIER",
+    "message": "Missende of ongeldige identifier."
+}
+</xmp></li>
+</ul>
+<h3>Test 5: Identifier is geldige URL maar geen ARK (verwacht 400)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen/https%3A%2F%2Fexample.com%2Ffoo>https://api-straatnamen.goudatijdmachine.nl/straatnamen/https%3A%2F%2Fexample.com%2Ffoo</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 400 (expected 400)</li>
+<li><strong>Response time</strong>: 28ms (no cache) / 50ms (with cache)</li>
 <li><strong>Response body</strong>: <xmp>{
     "code": "INVALID_IDENTIFIER",
     "message": "Missende of ongeldige identifier."
@@ -56,126 +79,415 @@
 </xmp></li>
 </ul>
 <h2>GET /straatnamen</h2>
-<h3>Test 4: Geef een lijst van straten (in JSON)</h3>
+<h3>Test 6: Geef een lijst van straten (in JSON)</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen>https://api-straatnamen.goudatijdmachine.nl/straatnamen</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 61ms (no cache) / 209ms (with cache)</li>
-<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bngV1Z","naam":"'t Groene Eiland","naam_alt":["Het Groene Eiland"]},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/boWudU","naam":"'t Oude Halletje","naam_alt":["bi der halle, 1e gangje, Hall
+<li><strong>Response time</strong>: 944ms (no cache) / 51ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.straten | length > 0</code></li>
+<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bngV1Z","naam":"'t Groene Eiland","naam_alt":["Het Groene Eiland"]},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/boWudU","naam":"'t Oude Halletje","naam_alt":["Oude Walletje, 1e gangje, t O
 ...
 </xmp></li>
 </ul>
-<h3>Test 5: Geef lijst van alle straatnamen (in GeoJSON)</h3>
+<h3>Test 7: Geef lijst van alle straatnamen (in GeoJSON via query param)</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?geojson>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?geojson</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?geojson>https://api-straatnamen.goudatijdmachine.nl/straatnamen?geojson</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 159ms (no cache) / 122ms (with cache)</li>
+<li><strong>Response time</strong>: 116ms (no cache) / 96ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.type == "FeatureCollection" and (.features | length > 0)</code></li>
 <li><strong>Response body</strong>: <xmp>{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bngV1Z","naam":"'t Groene Eiland","naam_alt":"Het Groene Eiland","type":"heden"},"geometry":{"type":"MultiLineString","coordinates":
 ...
 </xmp></li>
 </ul>
-<h3>Test 6: Geef lijst van 10 straatnamen (beginnende op index 10)</h3>
+<h3>Test 8: Geef lijst van alle straatnamen (in GeoJSON via Accept header)</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?limit=10&offset=10>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?limit=10&offset=10</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen>https://api-straatnamen.goudatijdmachine.nl/straatnamen</a> (Accept: application/geo+json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 55ms (no cache) / 140ms (with cache)</li>
-<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bms6OW","naam":"Aaltje Bakstraat","naam_alt":null},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/b7vgEo","naam":"Aardappelkade","naam_alt":null},{"identifier":"https:\/\/n2t.net\/ark:\/60537
+<li><strong>Response time</strong>: 108ms (no cache) / 103ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.type == "FeatureCollection" and (.features[0].geometry.type | IN("MultiLineString","LineString","Polygon"))</code></li>
+<li><strong>Response body</strong>: <xmp>{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bngV1Z","naam":"'t Groene Eiland","naam_alt":"Het Groene Eiland","type":"heden"},"geometry":{"type":"MultiLineString","coordinates":
 ...
 </xmp></li>
 </ul>
-<h3>Test 7: Geef lijst van straatnamen met zoekterm 'achter'</h3>
+<h3>Test 9: Geef lijst van 10 straatnamen (beginnende op index 10); aantal-veld matcht het aantal terugkomende rijen</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?q=achter>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?q=achter</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=10&offset=10>https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=10&offset=10</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 57ms (no cache) / 136ms (with cache)</li>
+<li><strong>Response time</strong>: 109ms (no cache) / 30ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>(.straten | length == 10) and (.aantal | type == "number") and (.aantal == (.straten | length))</code></li>
+<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/b03np17","naam":"Aaltje Bakstraat","naam_alt":["Aert of Aeltgen Backsteech, Willem Aertsz. steghe, Munckstraet, Munck- en Monnikestraet, Monnikestraet, Monnicksteghe, Aaltje Baksteeg"]},{"ide
+...
+</xmp></li>
+</ul>
+<h3>Test 10: Geef lijst van straatnamen met zoekterm 'achter'</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?q=achter>https://api-straatnamen.goudatijdmachine.nl/straatnamen?q=achter</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 370ms (no cache) / 33ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.straten | length > 0 and all(any((.naam, (.naam_alt // [])[]); test("achter"; "i")))</code></li>
 <li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bfq1U7","naam":"Achter 't Swarte Paart","naam_alt":null},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bXhYFo","naam":"Achter de Boomgaard","naam_alt":null},{"identifier":"https:\/\/n2t.net\
 ...
 </xmp></li>
 </ul>
-<h3>Test 8: Geef lijst van straatnamen met zoekterm 'xyz' die niet gevonden wordt</h3>
+<h3>Test 11: Geef lijst van straatnamen met zoekterm 'xyz' die niet gevonden wordt</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?q=xyz>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?q=xyz</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?q=xyz>https://api-straatnamen.goudatijdmachine.nl/straatnamen?q=xyz</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 404 (expected 404)</li>
-<li><strong>Response time</strong>: 59ms (no cache) / 128ms (with cache)</li>
+<li><strong>Response time</strong>: 102ms (no cache) / 30ms (with cache)</li>
 <li><strong>Response body</strong>: <xmp>{
     "code": "NOT_FOUND",
     "message": "Geen straten gevonden."
 }
 </xmp></li>
 </ul>
-<h3>Test 9: Geef lijst van 5 straatnamen dicht bij punt</h3>
+<h3>Test 12: Offset voorbij beschikbare straten levert 404 met code NOT_FOUND</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?limit=5&lat=52.00497413812719&lon=4.678175320942639>https://www.goudatijdmachine.nl/api-straatnamen/straatnamen?limit=5&lat=52.00497413812719&lon=4.678175320942639</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?offset=999999>https://api-straatnamen.goudatijdmachine.nl/straatnamen?offset=999999</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 404 (expected 404)</li>
+<li><strong>Response time</strong>: 81ms (no cache) / 28ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.code == "NOT_FOUND"</code></li>
+<li><strong>Response body</strong>: <xmp>{
+    "code": "NOT_FOUND",
+    "message": "Geen straten gevonden."
+}
+</xmp></li>
+</ul>
+<h3>Test 13: Geef lijst van 5 straatnamen dicht bij punt</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=5&lat=52.00497413812719&lon=4.678175320942639>https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=5&lat=52.00497413812719&lon=4.678175320942639</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 47ms (no cache) / 65ms (with cache)</li>
+<li><strong>Response time</strong>: 116ms (no cache) / 31ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.straten | length == 5</code></li>
 <li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/b9MVd1","naam":"Scheygrondplantsoen","naam_alt":null},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bxGU0E","naam":"Burgemeester van Dijkesingel","naam_alt":null},{"identifier":"https:\/\/n2
 ...
 </xmp></li>
 </ul>
-<h2>GET /afbeeldingen/{identifier}</h2>
-<h3>Test 10: Geef informatie over de Lombardsteeg (https://n2t.net/ark:/60537/bn4b1Q)</h3>
+<h3>Test 14: Filter type=huidig levert straten op</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q>https://www.goudatijdmachine.nl/api-straatnamen/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?type=huidig&limit=5>https://api-straatnamen.goudatijdmachine.nl/straatnamen?type=huidig&limit=5</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 48ms (no cache) / 54ms (with cache)</li>
-<li><strong>Response body</strong>: <xmp>{"aantal":4,"afbeeldingen":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bcHSSp","titel":"De noordzijde van Achter de Vismarkt vanaf de Lombardsteeg noordoostwaarts, ca. 1918","thumbnail":"https:\/\/www.goudatijdmachine.nl\/omeka\/files\/medium\/b1
+<li><strong>Response time</strong>: 119ms (no cache) / 28ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.straten | length > 0</code></li>
+<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bngV1Z","naam":"'t Groene Eiland","naam_alt":["Het Groene Eiland"]},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/boWudU","naam":"'t Oude Halletje","naam_alt":["1e gangje, t Oude Halletje, O
 ...
 </xmp></li>
 </ul>
-<h3>Test 11: Geef informatie over een niet-bestaande straat</h3>
+<h3>Test 15: Filter type=verdwenen levert straten op</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a>https://www.goudatijdmachine.nl/api-straatnamen/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?type=verdwenen&limit=5>https://api-straatnamen.goudatijdmachine.nl/straatnamen?type=verdwenen&limit=5</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 98ms (no cache) / 31ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.straten | length > 0</code></li>
+<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bzzeU4","naam":"'t Verlaat","naam_alt":["t Verlaat"]},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bFBFdQ","naam":"A.B.C. Poortje","naam_alt":["A.B.C. Poortgen"]},{"identifier":"https:\/\/n
+...
+</xmp></li>
+</ul>
+<h3>Test 16: Onbekend type-filter passeert ongewijzigd naar SPARQL en levert 404</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?type=onzin&limit=5>https://api-straatnamen.goudatijdmachine.nl/straatnamen?type=onzin&limit=5</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 404 (expected 404)</li>
-<li><strong>Response time</strong>: 47ms (no cache) / 57ms (with cache)</li>
+<li><strong>Response time</strong>: 69ms (no cache) / 31ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{
+    "code": "NOT_FOUND",
+    "message": "Geen straten gevonden."
+}
+</xmp></li>
+</ul>
+<h3>Test 17: Gecombineerd filter (q + type=huidig) levert straten op</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?q=achter&type=huidig&limit=5>https://api-straatnamen.goudatijdmachine.nl/straatnamen?q=achter&type=huidig&limit=5</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 78ms (no cache) / 31ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.straten | length > 0</code></li>
+<li><strong>Response body</strong>: <xmp>{"straten":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bXhYFo","naam":"Achter de Boomgaard","naam_alt":null},{"identifier":"https:\/\/n2t.net\/ark:\/60537\/be9AQu","naam":"Achter de Kerk","naam_alt":["Achter de Sintjanskerk, Achterde Kerk, Agter 
+...
+</xmp></li>
+</ul>
+<h3>Test 18: GeoJSON-mode met onvindbare zoekterm levert lege FeatureCollection (geen 404)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?q=xyz&geojson>https://api-straatnamen.goudatijdmachine.nl/straatnamen?q=xyz&geojson</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 29ms (no cache) / 29ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.type == "FeatureCollection" and (.features | length == 0)</code></li>
+<li><strong>Response body</strong>: <xmp>{"type":"FeatureCollection","features":[]}
+</xmp></li>
+</ul>
+<h3>Test 19: GeoJSON-mode met lat/lon proximity</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=5&lat=52.00497413812719&lon=4.678175320942639&geojson>https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=5&lat=52.00497413812719&lon=4.678175320942639&geojson</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 31ms (no cache) / 32ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.type == "FeatureCollection" and (.features | length == 5)</code></li>
+<li><strong>Response body</strong>: <xmp>{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"identifier":"https:\/\/n2t.net\/ark:\/60537\/b9MVd1","naam":"Scheygrondplantsoen","naam_alt":null,"type":"heden"},"geometry":{"type":"MultiLineString","coordinates":[[[4.6778718
+...
+</xmp></li>
+</ul>
+<h3>Test 20: Ongeldige Accept header (text/plain) levert 406; foutbody bevat code NOT_ACCEPTABLE</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=5>https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=5</a> (Accept: text/plain)</li>
+<li><strong>Response code</strong>: 406 (expected 406)</li>
+<li><strong>Response time</strong>: 28ms (no cache) / 31ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.code == "NOT_ACCEPTABLE" and (.message | type == "string")</code></li>
+<li><strong>Response body</strong>: <xmp>{
+    "code": "NOT_ACCEPTABLE",
+    "message": "Ongeldige accept header."
+}
+</xmp></li>
+</ul>
+<h2>GET /afbeeldingen/{identifier}</h2>
+<h3>Test 21: Geef informatie over de Lombardsteeg (https://n2t.net/ark:/60537/bn4b1Q)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q>https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 366ms (no cache) / 33ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.afbeeldingen | length > 0 and (.[0] | has("identifier") and has("titel") and has("thumbnail"))</code></li>
+<li><strong>Response body</strong>: <xmp>{"aantal":5,"afbeeldingen":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bcHSSp","titel":"De noordzijde van Achter de Vismarkt vanaf de Lombardsteeg noordoostwaarts, ca. 1918","thumbnail":"https:\/\/www.goudatijdmachine.nl\/omeka\/files\/square\/b1
+...
+</xmp></li>
+</ul>
+<h3>Test 22: Beperk afbeeldingen tot 3 met limit parameter en check aantal-totaal</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q?limit=3>https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q?limit=3</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 29ms (no cache) / 28ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>(.afbeeldingen | length == 3) and (.aantal | type == "number") and (.aantal >= 3)</code></li>
+<li><strong>Response body</strong>: <xmp>{"aantal":5,"afbeeldingen":[{"identifier":"https:\/\/n2t.net\/ark:\/60537\/bcHSSp","titel":"De noordzijde van Achter de Vismarkt vanaf de Lombardsteeg noordoostwaarts, ca. 1918","thumbnail":"https:\/\/www.goudatijdmachine.nl\/omeka\/files\/square\/b1
+...
+</xmp></li>
+</ul>
+<h3>Test 23: Offset voorbij beschikbare afbeeldingen levert lege array</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q?limit=5&offset=999999>https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q?limit=5&offset=999999</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 32ms (no cache) / 31ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.afbeeldingen | length == 0</code></li>
+<li><strong>Response body</strong>: <xmp>{"aantal":5,"afbeeldingen":[]}
+</xmp></li>
+</ul>
+<h3>Test 24: Geef informatie over een niet-bestaande straat</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a>https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 404 (expected 404)</li>
+<li><strong>Response time</strong>: 314ms (no cache) / 29ms (with cache)</li>
 <li><strong>Response body</strong>: <xmp>{
     "code": "NOT_FOUND",
     "message": "Straat niet gevonden."
 }
 </xmp></li>
 </ul>
-<h3>Test 12: Geef informatie over straat op basis van een ongeldige identifier</h3>
+<h3>Test 25: Geef informatie over straat op basis van een ongeldige identifier</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/afbeeldingen/test>https://www.goudatijdmachine.nl/api-straatnamen/afbeeldingen/test</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/test>https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/test</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 400 (expected 400)</li>
-<li><strong>Response time</strong>: 47ms (no cache) / 46ms (with cache)</li>
+<li><strong>Response time</strong>: 34ms (no cache) / 29ms (with cache)</li>
 <li><strong>Response body</strong>: <xmp>{
     "code": "INVALID_IDENTIFIER",
     "message": "Missende of ongeldige identifier."
 }
 </xmp></li>
 </ul>
-<h2>HTTP check - Documentatie</h2>
-<h3>Test 13: Ongedefineerde route moet leiden naar documentatie</h3>
+<h3>Test 26: Identifier is geldige URL maar geen ARK (verwacht 400)</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/api-straatnamen/undefined-route>https://www.goudatijdmachine.nl/api-straatnamen/undefined-route</a></li>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fexample.com%2Ffoo>https://api-straatnamen.goudatijdmachine.nl/afbeeldingen/https%3A%2F%2Fexample.com%2Ffoo</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 400 (expected 400)</li>
+<li><strong>Response time</strong>: 29ms (no cache) / 31ms (with cache)</li>
+<li><strong>Response body</strong>: <xmp>{
+    "code": "INVALID_IDENTIFIER",
+    "message": "Missende of ongeldige identifier."
+}
+</xmp></li>
+</ul>
+<h2>GET /ping</h2>
+<h3>Test 27: Ping diagnostics endpoint geeft 200 + verwachte sleutels + sparql endpoint heeft gereageerd</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/ping>https://api-straatnamen.goudatijdmachine.nl/ping</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 46ms (no cache) / 43ms (with cache)</li>
+<li><strong>Response time</strong>: 2906ms (no cache) / 627ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>has("time") and has("php") and has("egress_ipv4") and has("sparql_probe") and (.sparql_probe | has("url") and has("connect_ms") and (.http | type == "number"))</code></li>
+<li><strong>Response body</strong>: <xmp>{"time":"2026-07-20T13:23:53+00:00","php":"8.4.23","server_addr":"168.119.145.32","egress_ipv4":"168.119.145.32","egress_ipv6":"2a01:4f8:251:81c::2","sparql_probe":{"url":"https:\/\/sparql.goudatijdmachine.nl","resolved_ip":"168.119.145.32","http":40
+...
+</xmp></li>
+</ul>
+<h2>HTTP check - Methods</h2>
+<h3>Test 28: PUT op /straatnamen levert 405 Method Not Allowed</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: PUT <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen>https://api-straatnamen.goudatijdmachine.nl/straatnamen</a></li>
+<li><strong>Response code</strong>: 405 (expected 405)</li>
+<li><strong>Response time</strong>: 29ms (no cache) / 31ms (with cache)</li>
+</ul>
+<h3>Test 29: DELETE op /straatnamen levert 405 Method Not Allowed</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: DELETE <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen>https://api-straatnamen.goudatijdmachine.nl/straatnamen</a></li>
+<li><strong>Response code</strong>: 405 (expected 405)</li>
+<li><strong>Response time</strong>: 30ms (no cache) / 29ms (with cache)</li>
+</ul>
+<h2>HTTP check - Static assets</h2>
+<h3>Test 30: /assets/style.css wordt geserveerd als text/css</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/assets/style.css>https://api-straatnamen.goudatijdmachine.nl/assets/style.css</a></li>
+<li><strong>Header</strong>: Content-Type: text/css</li>
+<li><strong>Expected pattern</strong>: <code>^text/css</code></li>
+</ul>
+<h3>Test 31: /assets/gtm-logo-2025.svg wordt geserveerd als image/svg+xml</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/assets/gtm-logo-2025.svg>https://api-straatnamen.goudatijdmachine.nl/assets/gtm-logo-2025.svg</a></li>
+<li><strong>Header</strong>: Content-Type: image/svg+xml</li>
+<li><strong>Expected pattern</strong>: <code>^image/svg\+xml</code></li>
+</ul>
+<h3>Test 32: /assets/* wordt met Cache-Control geserveerd</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/assets/style.css>https://api-straatnamen.goudatijdmachine.nl/assets/style.css</a></li>
+<li><strong>Header</strong>: Cache-Control: max-age=31536000, immutable</li>
+<li><strong>Expected pattern</strong>: <code>max-age</code></li>
+</ul>
+<h3>Test 33: /favicon.ico wordt geserveerd als image/x-icon</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/favicon.ico>https://api-straatnamen.goudatijdmachine.nl/favicon.ico</a></li>
+<li><strong>Header</strong>: Content-Type: image/x-icon</li>
+<li><strong>Expected pattern</strong>: <code>^image/x-icon</code></li>
+</ul>
+<h3>Test 34: Path traversal poging valt door naar docs (realpath-guard in serveAsset)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/assets/../api/config.php>https://api-straatnamen.goudatijdmachine.nl/assets/../api/config.php</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 30ms (no cache) / 30ms (with cache)</li>
+</ul>
+<h3>Test 35: /qa-results/ serveert testresultaten-HTML</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/qa-results/>https://api-straatnamen.goudatijdmachine.nl/qa-results/</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 34ms (no cache) / 34ms (with cache)</li>
+</ul>
+<h2>HTTP check - CORS headers op GET</h2>
+<h3>Test 36: GET /straatnamen bevat Access-Control-Allow-Origin: *</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=1>https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=1</a></li>
+<li><strong>Header</strong>: Access-Control-Allow-Origin: *</li>
+<li><strong>Expected pattern</strong>: <code>^\*$</code></li>
+</ul>
+<h3>Test 37: GET /straatnamen bevat Access-Control-Allow-Methods met GET</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=1>https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=1</a></li>
+<li><strong>Header</strong>: Access-Control-Allow-Methods: GET, POST, OPTIONS</li>
+<li><strong>Expected pattern</strong>: <code>GET</code></li>
+</ul>
+<h3>Test 38: GET /straatnamen bevat Access-Control-Allow-Headers met Content-Type</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=1>https://api-straatnamen.goudatijdmachine.nl/straatnamen?limit=1</a></li>
+<li><strong>Header</strong>: Access-Control-Allow-Headers: Content-Type, Authorization</li>
+<li><strong>Expected pattern</strong>: <code>Content-Type</code></li>
+</ul>
+<h3>Test 39: GET /ping bevat Content-Type: application/json</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/ping>https://api-straatnamen.goudatijdmachine.nl/ping</a></li>
+<li><strong>Header</strong>: Content-Type: application/json</li>
+<li><strong>Expected pattern</strong>: <code>^application/json</code></li>
+</ul>
+<h3>Test 40: GeoJSON-response heeft Content-Type: application/geo+json</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen?geojson&limit=1>https://api-straatnamen.goudatijdmachine.nl/straatnamen?geojson&limit=1</a></li>
+<li><strong>Header</strong>: Content-Type: application/geo+json</li>
+<li><strong>Expected pattern</strong>: <code>^application/geo\+json</code></li>
+</ul>
+<h2>HTTP check - Documentatie</h2>
+<h3>Test 41: Ongedefineerde route moet leiden naar documentatie</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/undefined-route>https://api-straatnamen.goudatijdmachine.nl/undefined-route</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 28ms (no cache) / 28ms (with cache)</li>
+</ul>
+<h3>Test 42: /straatnamen/ (lege identifier) matcht de detail-route niet en valt door naar documentatie</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen/>https://api-straatnamen.goudatijdmachine.nl/straatnamen/</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 30ms (no cache) / 31ms (with cache)</li>
 </ul>
 <h2>HTTP check - CORS</h2>
-<h3>Test 14: OPTIONS request</h3>
+<h3>Test 43: OPTIONS op bestaand pad /straatnamen levert 204</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: OPTIONS <a href=https://www.goudatijdmachine.nl/api-straatnamen/straten>https://www.goudatijdmachine.nl/api-straatnamen/straten</a></li>
+<li><strong>Request</strong>: OPTIONS <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen>https://api-straatnamen.goudatijdmachine.nl/straatnamen</a></li>
 <li><strong>Response code</strong>: 204 (expected 204)</li>
-<li><strong>Response time</strong>: 42ms (no cache) / 41ms (with cache)</li>
+<li><strong>Response time</strong>: 29ms (no cache) / 28ms (with cache)</li>
+</ul>
+<h3>Test 44: OPTIONS op onbekend pad levert ook 204 (globale CORS-preflight)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: OPTIONS <a href=https://api-straatnamen.goudatijdmachine.nl/onbekend-pad>https://api-straatnamen.goudatijdmachine.nl/onbekend-pad</a></li>
+<li><strong>Response code</strong>: 204 (expected 204)</li>
+<li><strong>Response time</strong>: 28ms (no cache) / 28ms (with cache)</li>
+</ul>
+<h3>Test 45: OPTIONS-preflight bevat Access-Control-Allow-Origin: *</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: OPTIONS <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen>https://api-straatnamen.goudatijdmachine.nl/straatnamen</a></li>
+<li><strong>Header</strong>: Access-Control-Allow-Origin: *</li>
+<li><strong>Expected pattern</strong>: <code>^\*$</code></li>
+</ul>
+<h3>Test 46: OPTIONS-preflight bevat Access-Control-Allow-Methods: GET, POST, OPTIONS</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: OPTIONS <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen>https://api-straatnamen.goudatijdmachine.nl/straatnamen</a></li>
+<li><strong>Header</strong>: Access-Control-Allow-Methods: GET, POST, OPTIONS</li>
+<li><strong>Expected pattern</strong>: <code>GET, POST, OPTIONS</code></li>
+</ul>
+<h3>Test 47: OPTIONS-preflight bevat Access-Control-Allow-Headers: Content-Type</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: OPTIONS <a href=https://api-straatnamen.goudatijdmachine.nl/straatnamen>https://api-straatnamen.goudatijdmachine.nl/straatnamen</a></li>
+<li><strong>Header</strong>: Access-Control-Allow-Headers: Content-Type, Authorization</li>
+<li><strong>Expected pattern</strong>: <code>Content-Type</code></li>
 </ul>
 <h2>HTTP check - Test SAMH links</h2>
-<h3>Test 15: IIIF Image API</h3>
+<h3>Test 48: IIIF Image API</h3>
 <ul class='pass'>
-<li><strong>Request</strong>: GET <a href=https://images.memorix.nl/sahm/iiif/c8a7c04c-a2b4-99cf-3999-18d6b6478563/info.json>https://images.memorix.nl/sahm/iiif/c8a7c04c-a2b4-99cf-3999-18d6b6478563/info.json</a></li>
+<li><strong>Request</strong>: GET <a href=https://images.memorix.nl/sahm/iiif/c8a7c04c-a2b4-99cf-3999-18d6b6478563/info.json>https://images.memorix.nl/sahm/iiif/c8a7c04c-a2b4-99cf-3999-18d6b6478563/info.json</a> (Accept: application/json)</li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 81ms (no cache) / 106ms (with cache)</li>
+<li><strong>Response time</strong>: 66ms (no cache) / 64ms (with cache)</li>
 <li><strong>Response body</strong>: <xmp>{"@context":"http:\/\/iiif.io\/api\/image\/2\/context.json","protocol":"http:\/\/iiif.io\/api\/image","width":2681,"height":1996,"sizes":[{"width":168,"height":125},{"width":336,"height":250},{"width":671,"height":499},{"width":1341,"height":998}],"t
 ...
 </xmp></li>
 </ul>
-<h3>Test 16: SAMH beeldbank</h3>
+<h3>Test 49: SAMH beeldbank</h3>
 <ul class='pass'>
 <li><strong>Request</strong>: GET <a href=https://samh.nl/bronnen/beeldbank/detail/0a6ffb0c-7959-70e8-d995-4bc3a1d0d9df/media/c8a7c04c-a2b4-99cf-3999-18d6b6478563>https://samh.nl/bronnen/beeldbank/detail/0a6ffb0c-7959-70e8-d995-4bc3a1d0d9df/media/c8a7c04c-a2b4-99cf-3999-18d6b6478563</a></li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 174ms (no cache) / 172ms (with cache)</li>
+<li><strong>Response time</strong>: 282ms (no cache) / 197ms (with cache)</li>
 </ul>
-<h3>Test 17: SAMH akte pagina</h3>
+<h3>Test 50: SAMH akte pagina</h3>
 <ul class='pass'>
 <li><strong>Request</strong>: GET <a href=https://samh.nl/bronnen/genealogie/deeds/a634024a-cac3-98ba-3d4f-77a5e270a5ec>https://samh.nl/bronnen/genealogie/deeds/a634024a-cac3-98ba-3d4f-77a5e270a5ec</a></li>
 <li><strong>Response code</strong>: 200 (expected 200)</li>
-<li><strong>Response time</strong>: 117ms (no cache) / 163ms (with cache)</li>
+<li><strong>Response time</strong>: 128ms (no cache) / 110ms (with cache)</li>
+</ul>
+<h2>HTTP check - Test Omeka thumbnails</h2>
+<h3>Test 51: Omeka thumbnail 1 die bestaat</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/omeka/files/medium/05a057c0734aeb68e67b609a35473ec977521a1f.jpg>https://www.goudatijdmachine.nl/omeka/files/medium/05a057c0734aeb68e67b609a35473ec977521a1f.jpg</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 55ms (no cache) / 55ms (with cache)</li>
+</ul>
+<h3>Test 52: Omeka thumbnail 2 die niet bestaat</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://www.goudatijdmachine.nl/omeka/files/medium/f166c8fbec016f567150983214a2c46e99177c1e.jpg>https://www.goudatijdmachine.nl/omeka/files/medium/f166c8fbec016f567150983214a2c46e99177c1e.jpg</a></li>
+<li><strong>Response code</strong>: 404 (expected 404)</li>
+<li><strong>Response time</strong>: 122ms (no cache) / 144ms (with cache)</li>
+</ul>
+<h2>Beheer - POST /clear_cache</h2>
+<h3>Test 53: POST /clear_cache zonder verse cache-inhoud levert 'No keys were cleared' (==0 branch)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: POST <a href=https://api-straatnamen.goudatijdmachine.nl/clear_cache>https://api-straatnamen.goudatijdmachine.nl/clear_cache</a> (Accept: application/json)</li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 31ms (no cache) / 28ms (with cache)</li>
+<li><strong>Body assertion</strong>: <code>.message | test("No keys were cleared")</code></li>
+<li><strong>Response body</strong>: <xmp>{"message":"No keys were cleared from cache"}
+</xmp></li>
+</ul>
+<h3>Test 54: GET /clear_cache valt op ongedefineerde route en levert documentatie</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: GET <a href=https://api-straatnamen.goudatijdmachine.nl/clear_cache>https://api-straatnamen.goudatijdmachine.nl/clear_cache</a></li>
+<li><strong>Response code</strong>: 200 (expected 200)</li>
+<li><strong>Response time</strong>: 34ms (no cache) / 29ms (with cache)</li>
+</ul>
+<h2>Beheer - clear_cache >0 branch</h2>
+<h3>Test 55: POST /clear_cache na cache vullen levert 'Successfully cleared N keys' (>0 branch)</h3>
+<ul class='pass'>
+<li><strong>Request</strong>: POST <a href="https://api-straatnamen.goudatijdmachine.nl/clear_cache">https://api-straatnamen.goudatijdmachine.nl/clear_cache</a> (na 1 GET om cache te vullen)</li>
+<li><strong>Response body</strong>: <xmp>{"message":"Successfully cleared 1 keys from cache"}</xmp></li>
+</ul>
+</body></html>

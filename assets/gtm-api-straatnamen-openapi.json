@@ -3,7 +3,7 @@
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
         "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
-        "version": "v1.3.0",
+        "version": "v1.4.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
             "url": "https://www.goudatijdmachine.nl/straatnamen/"
