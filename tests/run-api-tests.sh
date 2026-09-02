@@ -2,7 +2,8 @@
 set -euo pipefail
 
 #BASE_URL=https://api-straatnamen.goudatijdmachine.nl
-BASE_URL=https://www.goudatijdmachine.nl/api-straatnamen
+# Overschrijfbaar voor een lokale run: BASE_URL=http://127.0.0.1:8099 bash run-api-tests.sh
+BASE_URL="${BASE_URL:-https://www.goudatijdmachine.nl/api-straatnamen}"
 
 # API Testing Script for Gouda Tijdmachine Straatnamen API
 # Tests all endpoints defined in the OpenAPI specification (except for clear cache)
@@ -233,13 +234,17 @@ test_json_endpoint() {
 }
 
 # Function to verify a specific response header matches a regex.
-# Uses HEAD request; falls back if 405/HEAD not supported is observed.
+# Optional arg:
+#   $6 accept — Accept header to send. Nodig voor endpoints die op de Accept-header
+#               onderhandelen: /straatnamen antwoordt zonder bruikbare Accept met een 406,
+#               en die foutresponse draagt geen cache-validators.
 test_header() {
     local method=$1
     local endpoint=$2
     local header_name=$3
     local expected_regex=$4
     local description=$5
+    local accept="${6:-}"
 
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
@@ -247,11 +252,16 @@ test_header() {
     echo "<h3>Test $TOTAL_TESTS: $description</h3>" >> $TESTHTML
 
     start_time=$(date +%s%3N)
-    headers=$(curl -sD - -o /dev/null -X $method "$endpoint")
+    if [ -n "$accept" ]; then
+        headers=$(curl -sD - -o /dev/null -H "Accept: $accept" -X $method "$endpoint")
+    else
+        headers=$(curl -sD - -o /dev/null -X $method "$endpoint")
+    fi
     end_time=$(date +%s%3N)
     response_time=$((end_time - start_time))
 
-    header_line=$(echo "$headers" | grep -i "^${header_name}:" | head -n1 | tr -d '\r')
+    # || true: een ontbrekende header moet een FAIL opleveren, niet de hele run afbreken (set -e).
+    header_line=$(echo "$headers" | grep -i "^${header_name}:" | head -n1 | tr -d '\r' || true)
     header_value=$(echo "$header_line" | sed -E "s/^[^:]+:[[:space:]]*//")
 
     if [[ "$header_value" =~ $expected_regex ]]; then
@@ -266,6 +276,160 @@ test_header() {
     echo "<li><strong>Request</strong>: $method <a href=""$endpoint"">$endpoint</a></li>" >> $TESTHTML
     echo "<li><strong>Header</strong>: $header_name: ${header_value:-<missing>}</li>" >> $TESTHTML
     echo "<li><strong>Expected pattern</strong>: <code>$expected_regex</code></li>" >> $TESTHTML
+    echo "</ul>" >> $TESTHTML
+}
+
+# Function to verify a conditional request returns the expected status.
+# Haalt de validator (ETag of Last-Modified) op uit een verse response en stuurt hem
+# terug in If-None-Match / If-Modified-Since. Bij een verwachte 304 wordt ook
+# gecontroleerd dat er geen body is meegestuurd.
+#   $1 endpoint  $2 accept  $3 conditional header  $4 expected status  $5 description
+#   $6 optioneel: letterlijke validatorwaarde (i.p.v. ophalen uit een eerdere response)
+test_conditional() {
+    local endpoint=$1
+    local accept=$2
+    local cond_header=$3
+    local expected_status=$4
+    local description=$5
+    local literal="${6:-}"
+
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+
+    echo -e "\n${YELLOW}Test $TOTAL_TESTS: $description${NC}"
+    echo "<h3>Test $TOTAL_TESTS: $description</h3>" >> $TESTHTML
+
+    local source_header validator
+    case "$cond_header" in
+        If-None-Match)     source_header="ETag" ;;
+        If-Modified-Since) source_header="Last-Modified" ;;
+        *)                 source_header="" ;;
+    esac
+
+    if [ -n "$literal" ]; then
+        validator="$literal"
+    else
+        validator=$(curl -sD - -o /dev/null -H "Accept: $accept" "$endpoint" \
+            | grep -i "^${source_header}:" | head -n1 | tr -d '\r' | sed -E "s/^[^:]+:[[:space:]]*//" || true)
+    fi
+
+    start_time=$(date +%s%3N)
+    result=$(curl -s -o /dev/null -w "%{http_code} %{size_download}" \
+        -H "Accept: $accept" -H "$cond_header: $validator" "$endpoint")
+    end_time=$(date +%s%3N)
+    response_time=$((end_time - start_time))
+
+    http_code=$(echo "$result" | cut -d' ' -f1)
+    size=$(echo "$result" | cut -d' ' -f2)
+
+    body_ok=true
+    if [ "$expected_status" -eq 304 ] && [ "$size" -ne 0 ]; then
+        body_ok=false
+    fi
+
+    if [ -z "$validator" ]; then
+        echo -e "${RED}✗ FAIL (geen $source_header in de bronresponse)${NC} (${response_time}ms)"
+        echo "<ul class='fail'>" >> $TESTHTML
+    elif [ "$http_code" -eq "$expected_status" ] && [ "$body_ok" = true ]; then
+        echo -e "${GREEN}✓ PASS${NC} (${response_time}ms) — $cond_header: $validator"
+        echo "<ul class='pass'>" >> $TESTHTML
+        PASSED_TESTS=$((PASSED_TESTS + 1))
+    elif [ "$body_ok" = false ]; then
+        echo -e "${RED}✗ FAIL (304 met body van $size bytes)${NC} (${response_time}ms)"
+        echo "<ul class='fail'>" >> $TESTHTML
+    else
+        echo -e "${RED}✗ FAIL (expected $expected_status, got $http_code)${NC} (${response_time}ms)"
+        echo "<ul class='fail'>" >> $TESTHTML
+    fi
+
+    echo "<li><strong>Request</strong>: GET <a href=""$endpoint"">$endpoint</a> (Accept: $accept)</li>" >> $TESTHTML
+    echo "<li><strong>Conditionele header</strong>: $cond_header: ${validator:-<ontbreekt>}</li>" >> $TESTHTML
+    echo "<li><strong>Response code</strong>: $http_code (expected $expected_status)</li>" >> $TESTHTML
+    echo "<li><strong>Body</strong>: $size bytes</li>" >> $TESTHTML
+    echo "</ul>" >> $TESTHTML
+}
+
+# Function to verify a HEAD request: status, lege body en de aanwezigheid van de validators.
+#   $1 endpoint  $2 accept  $3 expected status  $4 description
+test_head() {
+    local endpoint=$1
+    local accept=$2
+    local expected_status=$3
+    local description=$4
+
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+
+    echo -e "\n${YELLOW}Test $TOTAL_TESTS: $description${NC}"
+    echo "<h3>Test $TOTAL_TESTS: $description</h3>" >> $TESTHTML
+
+    # -I stuurt een echte HEAD; -X HEAD zonder -I blijft hangen op een body die nooit komt.
+    start_time=$(date +%s%3N)
+    headers=$(curl -sI -H "Accept: $accept" -w "\nSTATUS:%{http_code} SIZE:%{size_download}" "$endpoint")
+    end_time=$(date +%s%3N)
+    response_time=$((end_time - start_time))
+
+    http_code=$(echo "$headers" | grep -o 'STATUS:[0-9]*' | cut -d: -f2 || true)
+    size=$(echo "$headers" | grep -o 'SIZE:[0-9]*' | cut -d: -f2 || true)
+    http_code=${http_code:-0}
+    size=${size:-0}
+
+    has_etag=false
+    has_lastmod=false
+    if echo "$headers" | grep -qi '^etag:'; then has_etag=true; fi
+    if echo "$headers" | grep -qi '^last-modified:'; then has_lastmod=true; fi
+
+    if [ "$http_code" -eq "$expected_status" ] && [ "$size" -eq 0 ] \
+       && [ "$has_etag" = true ] && [ "$has_lastmod" = true ]; then
+        echo -e "${GREEN}✓ PASS${NC} (${response_time}ms) — HEAD $expected_status, 0 bytes, ETag + Last-Modified aanwezig"
+        echo "<ul class='pass'>" >> $TESTHTML
+        PASSED_TESTS=$((PASSED_TESTS + 1))
+    else
+        echo -e "${RED}✗ FAIL${NC} status=$http_code (verwacht $expected_status), body=${size}B, ETag=$has_etag, Last-Modified=$has_lastmod (${response_time}ms)"
+        echo "<ul class='fail'>" >> $TESTHTML
+    fi
+
+    echo "<li><strong>Request</strong>: HEAD <a href=""$endpoint"">$endpoint</a> (Accept: $accept)</li>" >> $TESTHTML
+    echo "<li><strong>Response code</strong>: $http_code (expected $expected_status)</li>" >> $TESTHTML
+    echo "<li><strong>Body</strong>: $size bytes</li>" >> $TESTHTML
+    echo "<li><strong>Validators</strong>: ETag aanwezig: $has_etag, Last-Modified aanwezig: $has_lastmod</li>" >> $TESTHTML
+    echo "</ul>" >> $TESTHTML
+}
+
+# Function to verify a Last-Modified header is a parseable HTTP-date that is not in the future.
+#   $1 endpoint  $2 accept  $3 description
+test_last_modified_sane() {
+    local endpoint=$1
+    local accept=$2
+    local description=$3
+
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+
+    echo -e "\n${YELLOW}Test $TOTAL_TESTS: $description${NC}"
+    echo "<h3>Test $TOTAL_TESTS: $description</h3>" >> $TESTHTML
+
+    lastmod=$(curl -sD - -o /dev/null -H "Accept: $accept" "$endpoint" \
+        | grep -i '^last-modified:' | head -n1 | tr -d '\r' | sed -E "s/^[^:]+:[[:space:]]*//" || true)
+
+    lm_epoch=$(date -d "$lastmod" +%s 2>/dev/null || echo "")
+    now_epoch=$(date +%s)
+
+    if [ -z "$lastmod" ]; then
+        echo -e "${RED}✗ FAIL (geen Last-Modified)${NC}"
+        echo "<ul class='fail'>" >> $TESTHTML
+    elif [ -z "$lm_epoch" ]; then
+        echo -e "${RED}✗ FAIL (Last-Modified niet te parsen: '$lastmod')${NC}"
+        echo "<ul class='fail'>" >> $TESTHTML
+    elif [ "$lm_epoch" -gt "$now_epoch" ]; then
+        echo -e "${RED}✗ FAIL (Last-Modified ligt in de toekomst: '$lastmod')${NC}"
+        echo "<ul class='fail'>" >> $TESTHTML
+    else
+        echo -e "${GREEN}✓ PASS${NC} — Last-Modified: $lastmod"
+        echo "<ul class='pass'>" >> $TESTHTML
+        PASSED_TESTS=$((PASSED_TESTS + 1))
+    fi
+
+    echo "<li><strong>Request</strong>: GET <a href=""$endpoint"">$endpoint</a> (Accept: $accept)</li>" >> $TESTHTML
+    echo "<li><strong>Last-Modified</strong>: ${lastmod:-<ontbreekt>}</li>" >> $TESTHTML
+    echo "<li><strong>Nu</strong>: $(date -u '+%a, %d %b %Y %H:%M:%S GMT')</li>" >> $TESTHTML
     echo "</ul>" >> $TESTHTML
 }
 
@@ -320,6 +484,51 @@ test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%
 test_json_endpoint "GET" "$BASE_URL/afbeeldingen/test" 400 "Geef informatie over straat op basis van een ongeldige identifier"
 test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fexample.com%2Ffoo" 400 "Identifier is geldige URL maar geen ARK (verwacht 400)"
 
+# Cache-validators: Last-Modified / ETag / 304 / HEAD (issue #2)
+print_test_header "HTTP check - Cache-validators (Last-Modified, ETag, 304, HEAD)"
+
+STRAAT_ID="https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q"
+
+# --- /straatnamen ---
+test_header "GET" "$BASE_URL/straatnamen?limit=5" "Last-Modified" "^[A-Z][a-z]{2}, [0-9]{2} [A-Z][a-z]{2} [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2} GMT$" "GET /straatnamen stuurt een geldige Last-Modified" "application/json"
+test_header "GET" "$BASE_URL/straatnamen?limit=5" "ETag" "^\"[0-9a-f]{32}\"$" "GET /straatnamen stuurt een ETag" "application/json"
+test_header "GET" "$BASE_URL/straatnamen?limit=5" "Cache-Control" "must-revalidate" "GET /straatnamen stuurt Cache-Control met must-revalidate" "application/json"
+test_header "GET" "$BASE_URL/straatnamen?limit=5" "Vary" "Accept" "GET /straatnamen stuurt Vary: Accept (respons hangt af van de Accept-header)" "application/json"
+test_header "GET" "$BASE_URL/straatnamen?limit=5" "Access-Control-Expose-Headers" "ETag" "Access-Control-Expose-Headers maakt ETag leesbaar voor een browser-client" "application/json"
+test_header "GET" "$BASE_URL/straatnamen?limit=5" "Access-Control-Expose-Headers" "Last-Modified" "Access-Control-Expose-Headers maakt Last-Modified leesbaar voor een browser-client" "application/json"
+test_header "GET" "$BASE_URL/straatnamen?limit=5" "Access-Control-Allow-Headers" "If-None-Match" "Access-Control-Allow-Headers staat If-None-Match toe (preflight)" "application/json"
+test_last_modified_sane "$BASE_URL/straatnamen?limit=5" "application/json" "Last-Modified van /straatnamen ligt niet in de toekomst"
+test_conditional "$BASE_URL/straatnamen?limit=5" "application/json" "If-None-Match" 304 "GET /straatnamen met bijpassende If-None-Match levert 304 zonder body"
+test_conditional "$BASE_URL/straatnamen?limit=5" "application/json" "If-Modified-Since" 304 "GET /straatnamen met bijpassende If-Modified-Since levert 304 zonder body"
+test_conditional "$BASE_URL/straatnamen?limit=5" "application/json" "If-None-Match" 200 "GET /straatnamen met niet-passende If-None-Match levert gewoon 200" '"'"'"onzin"'"'"'
+test_conditional "$BASE_URL/straatnamen?limit=5" "application/json" "If-Modified-Since" 200 "GET /straatnamen met oude If-Modified-Since levert gewoon 200" "Mon, 01 Jan 2001 00:00:00 GMT"
+test_head "$BASE_URL/straatnamen?limit=5" "application/json" 200 "HEAD /straatnamen levert 200 met validators en zonder body"
+
+# --- /straatnamen in GeoJSON-vorm ---
+test_header "GET" "$BASE_URL/straatnamen?limit=5&geojson" "ETag" "^\"[0-9a-f]{32}\"$" "GeoJSON-response van /straatnamen stuurt ook een ETag" "application/geo+json"
+test_conditional "$BASE_URL/straatnamen?limit=5&geojson" "application/geo+json" "If-None-Match" 304 "GeoJSON-response van /straatnamen honoreert If-None-Match"
+
+# --- /straatnamen/{identifier} ---
+test_header "GET" "$BASE_URL/straatnamen/$STRAAT_ID" "Last-Modified" "^[A-Z][a-z]{2}, [0-9]{2} [A-Z][a-z]{2} [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2} GMT$" "GET /straatnamen/{identifier} stuurt een geldige Last-Modified" "application/json"
+test_header "GET" "$BASE_URL/straatnamen/$STRAAT_ID" "ETag" "^\"[0-9a-f]{32}\"$" "GET /straatnamen/{identifier} stuurt een ETag" "application/json"
+test_last_modified_sane "$BASE_URL/straatnamen/$STRAAT_ID" "application/json" "Last-Modified van /straatnamen/{identifier} ligt niet in de toekomst"
+test_conditional "$BASE_URL/straatnamen/$STRAAT_ID" "application/json" "If-None-Match" 304 "GET /straatnamen/{identifier} met bijpassende If-None-Match levert 304 zonder body"
+test_conditional "$BASE_URL/straatnamen/$STRAAT_ID" "application/json" "If-Modified-Since" 304 "GET /straatnamen/{identifier} met bijpassende If-Modified-Since levert 304 zonder body"
+test_conditional "$BASE_URL/straatnamen/$STRAAT_ID" "application/json" "If-None-Match" 200 "GET /straatnamen/{identifier} met niet-passende If-None-Match levert gewoon 200" '"'"'"onzin"'"'"'
+test_head "$BASE_URL/straatnamen/$STRAAT_ID" "application/json" 200 "HEAD /straatnamen/{identifier} levert 200 met validators en zonder body"
+
+# --- /afbeeldingen/{identifier} ---
+test_header "GET" "$BASE_URL/afbeeldingen/$STRAAT_ID" "Last-Modified" "^[A-Z][a-z]{2}, [0-9]{2} [A-Z][a-z]{2} [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2} GMT$" "GET /afbeeldingen/{identifier} stuurt een geldige Last-Modified" "application/json"
+test_header "GET" "$BASE_URL/afbeeldingen/$STRAAT_ID" "ETag" "^\"[0-9a-f]{32}\"$" "GET /afbeeldingen/{identifier} stuurt een ETag" "application/json"
+test_last_modified_sane "$BASE_URL/afbeeldingen/$STRAAT_ID" "application/json" "Last-Modified van /afbeeldingen/{identifier} ligt niet in de toekomst"
+test_conditional "$BASE_URL/afbeeldingen/$STRAAT_ID" "application/json" "If-None-Match" 304 "GET /afbeeldingen/{identifier} met bijpassende If-None-Match levert 304 zonder body"
+test_conditional "$BASE_URL/afbeeldingen/$STRAAT_ID" "application/json" "If-Modified-Since" 304 "GET /afbeeldingen/{identifier} met bijpassende If-Modified-Since levert 304 zonder body"
+test_conditional "$BASE_URL/afbeeldingen/$STRAAT_ID" "application/json" "If-None-Match" 200 "GET /afbeeldingen/{identifier} met niet-passende If-None-Match levert gewoon 200" '"'"'"onzin"'"'"'
+test_head "$BASE_URL/afbeeldingen/$STRAAT_ID" "application/json" 200 "HEAD /afbeeldingen/{identifier} levert 200 met validators en zonder body"
+
+# --- validators verschillen per representatie, en zijn stabiel bij herhaling ---
+test_conditional "$BASE_URL/straatnamen?limit=10" "application/json" "If-None-Match" 200 "ETag van /straatnamen?limit=5 past niet op ?limit=10 (andere representatie)" "$(curl -sD - -o /dev/null -H 'Accept: application/json' "$BASE_URL/straatnamen?limit=5" | grep -i '^etag:' | head -n1 | tr -d '\r' | sed -E 's/^[^:]+:[[:space:]]*//' || true)"
+
 # GET /ping
 print_test_header "GET /ping"
 test_json_endpoint "GET" "$BASE_URL/ping" 200 "Ping diagnostics endpoint geeft 200 + verwachte sleutels + sparql endpoint heeft gereageerd" "application/json" 'has("time") and has("php") and has("egress_ipv4") and has("sparql_probe") and (.sparql_probe | has("url") and has("connect_ms") and (.http | type == "number"))'
@@ -359,7 +568,7 @@ print_test_header "HTTP check - CORS"
 test_endpoint "OPTIONS" "$BASE_URL/straatnamen" 204 "OPTIONS op bestaand pad /straatnamen levert 204"
 test_endpoint "OPTIONS" "$BASE_URL/onbekend-pad" 204 "OPTIONS op onbekend pad levert ook 204 (globale CORS-preflight)"
 test_header "OPTIONS" "$BASE_URL/straatnamen" "Access-Control-Allow-Origin" "^\*$" "OPTIONS-preflight bevat Access-Control-Allow-Origin: *"
-test_header "OPTIONS" "$BASE_URL/straatnamen" "Access-Control-Allow-Methods" "GET, POST, OPTIONS" "OPTIONS-preflight bevat Access-Control-Allow-Methods: GET, POST, OPTIONS"
+test_header "OPTIONS" "$BASE_URL/straatnamen" "Access-Control-Allow-Methods" "GET, HEAD, POST, OPTIONS" "OPTIONS-preflight bevat Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS"
 test_header "OPTIONS" "$BASE_URL/straatnamen" "Access-Control-Allow-Headers" "Content-Type" "OPTIONS-preflight bevat Access-Control-Allow-Headers: Content-Type"
 
 # Test SAMH links

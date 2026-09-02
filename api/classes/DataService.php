@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once 'geoPHP.php';
 require_once 'SparqlService.php';
 require_once 'CacheService.php';
+require_once 'ResponseHelper.php';
 
 class DataService
 {
@@ -73,12 +74,25 @@ class DataService
         ];
     }
 
-    public function getStreet($straatidentifier): ?array
+    /**
+     * Hoogste wijzigingsdatum over de hele straatnamencollectie, als Unix-timestamp.
+     */
+    public function getIndexLastModified(): ?int
+    {
+        $result = $this->sparqlService->get_last_modified_index();
+
+        return ResponseHelper::toTimestamp($result[0]['gewijzigd']['value'] ?? null);
+    }
+
+    /**
+     * @return array{0: ?array, 1: ?int} straatgegevens en de wijzigingsdatum als timestamp
+     */
+    public function getStreet($straatidentifier): array
     {
         $street = $this->sparqlService->get_street($straatidentifier);
 
         if (empty($street)) {
-            return null;
+            return [null, null];
         }
 
         if (!empty($street[0]['geometry']['value'])) {
@@ -106,32 +120,44 @@ class DataService
              'type' => $street[0]['type']['value'],
         ];
 
-        return $streetData;
+        return [$streetData, ResponseHelper::toTimestamp($street[0]['gewijzigd']['value'] ?? null)];
     }
 
-    public function getImages($straatidentifier, $limit, $offset): ?array
+    /**
+     * @return array{0: int, 1: array, 2: ?int} aantal, afbeeldingen en de wijzigingsdatum als timestamp
+     */
+    public function getImages($straatidentifier, $limit, $offset): array
     {
 
         $allphotos = $this->sparqlService->get_photos_street($straatidentifier, $limit, $offset);
 
         if (empty($allphotos)) {
-            return [0,[]];
+            return [0, [], null];
         }
         $aantalfotos = count($allphotos);
+
+        // Geldt voor alle afbeeldingen van de straat, niet alleen voor de opgevraagde pagina,
+        // zodat de Last-Modified niet afhangt van limit/offset.
+        $gewijzigd = ResponseHelper::toTimestamp($allphotos[0]['gewijzigd']['value'] ?? null);
 
         if ($aantalfotos > $offset) {
             $partphotos = array_slice($allphotos, $offset, $limit);
         } else {
-            return [$aantalfotos, []];
+            return [$aantalfotos, [], $gewijzigd];
         }
         $fotos = [];
         foreach ($partphotos as $foto) {
+            $iiif = $foto['iiif_info_json']['value'] ?? '';
             $fotos[] = [
                 'identifier' => $foto['identifier']['value'] ?? '',
                 'titel' => $foto['titel']['value'] ?? '',
-                'thumbnail' => $foto['thumbnail']['value'] ?? '',
-                'image' => !empty($foto['iiif_info_json']['value']) ? str_replace("info.json", "full/500,/0/default.jpg", $foto['iiif_info_json']['value']) : '',
-                'iiif_info_json' => $foto['iiif_info_json']['value'] ?? '',
+                // o:thumbnail_urls/o:square zit niet meer in de RDF-export; val terug op dezelfde
+                // IIIF-bron als 'image'.
+                'thumbnail' => !empty($foto['thumbnail']['value'])
+                    ? $foto['thumbnail']['value']
+                    : (!empty($iiif) ? str_replace("info.json", "full/250,/0/default.jpg", $iiif) : ''),
+                'image' => !empty($iiif) ? str_replace("info.json", "full/500,/0/default.jpg", $iiif) : '',
+                'iiif_info_json' => $iiif,
                 'vervaardiger' => $foto['vervaardiger']['value'] ?? null,
                 'informatie_auteursrechten' => !empty($foto['informatie_auteursrechten']['value']) ? str_replace("https://samh.nl/auteursrechten#", "", $foto['informatie_auteursrechten']['value']) : null,
                 'url' => $foto['url']['value'] ?? null,
@@ -140,6 +166,6 @@ class DataService
             ];
         }
 
-        return [$aantalfotos,$fotos];
+        return [$aantalfotos, $fotos, $gewijzigd];
     }
 }

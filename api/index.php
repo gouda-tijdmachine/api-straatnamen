@@ -9,8 +9,12 @@ require_once 'classes/ApiHandler.php';
 require_once 'classes/ResponseHelper.php';
 
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS');
+// If-None-Match en If-Modified-Since zijn geen CORS-safelisted requestheaders en moeten dus
+// expliciet toegestaan worden; zonder Expose-Headers kan een browser-client ETag en
+// Last-Modified cross-origin niet uitlezen.
+header('Access-Control-Allow-Headers: Content-Type, Authorization, If-None-Match, If-Modified-Since');
+header('Access-Control-Expose-Headers: ETag, Last-Modified');
 
 if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     http_response_code(204);

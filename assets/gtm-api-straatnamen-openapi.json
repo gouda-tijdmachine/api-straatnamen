@@ -3,7 +3,7 @@
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
         "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
-        "version": "v1.4.0",
+        "version": "v1.5.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
             "url": "https://www.goudatijdmachine.nl/straatnamen/"
@@ -27,78 +27,64 @@
                 "description": "Geeft een set van straten. Gebruik de `Accept` header om te schakelen tussen een standaard overzicht (`application/json`) of geografische features (`application/geo+json`). Wanneer Accept headers niet mogelijk is kan ?geojson worden toegevoegd aan de API call.",
                 "parameters": [
                     {
-                        "name": "q",
-                        "description": "De te zoeken term in de straatnaam.",
-                        "in": "query",
-                        "required": false,
-                        "example": "achter",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "$ref": "#/components/parameters/Q"
                     },
                     {
-                        "name": "limit",
-                        "in": "query",
-                        "description": "Het maximum aantal straten dat geretourneerd moet worden.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32",
-                            "default": 2000
-                        }
+                        "$ref": "#/components/parameters/Limit"
                     },
                     {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "Het aantal straten om over te slaan.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32",
-                            "default": 0
-                        }
+                        "$ref": "#/components/parameters/Offset"
                     },
                     {
-                        "name": "lat",
-                        "in": "query",
-                        "description": "Geef lijst van straatnamen uitgaande van de breedtegraad (en lengtegraad)",
-                        "required": false,
-                        "schema": {
-                            "type": "number",
-                            "format": "float",
-                            "example": "52.0049"
-                        }
+                        "$ref": "#/components/parameters/Lat"
                     },
                     {
-                        "name": "lon",
-                        "in": "query",
-                        "description": "Geef lijst van straatnamen uitgaande van de lengtegraad (en breedtegraad)",
-                        "required": false,
-                        "schema": {
-                            "type": "number",
-                            "format": "float",
-                            "example": "4.6782"
-                        }
+                        "$ref": "#/components/parameters/Lon"
                     },
                     {
-                        "name": "type",
-                        "in": "query",
-                        "description": "Filter straten op type (huidig, verdwenen of alle).",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "huidig",
-                                "verdwenen",
-                                "alle"
-                            ],
-                            "default": "alle"
-                        }
+                        "$ref": "#/components/parameters/Type"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfNoneMatch"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfModifiedSince"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Succesvolle response met straten data.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop voor het laatst een straatnaam is toegevoegd of gewijzigd, inclusief de aan straten gekoppelde afbeeldingen. Geldt voor de hele collectie, ook bij een gefilterde opvraging.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            },
+                            "Vary": {
+                                "description": "De responsevorm hangt af van de Accept-header (JSON of GeoJSON); caches moeten daarop variëren.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Accept"
+                            }
+                        },
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -138,6 +124,40 @@
                             }
                         }
                     },
+                    "304": {
+                        "description": "Niet gewijzigd sinds de meegestuurde `If-None-Match` of `If-Modified-Since`. De response heeft geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop voor het laatst een straatnaam is toegevoegd of gewijzigd, inclusief de aan straten gekoppelde afbeeldingen. Geldt voor de hele collectie, ook bij een gefilterde opvraging.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            },
+                            "Vary": {
+                                "description": "De responsevorm hangt af van de Accept-header (JSON of GeoJSON); caches moeten daarop variëren.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Accept"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Geen straten gevonden."
                     },
@@ -158,6 +178,113 @@
                         }
                     }
                 }
+            },
+            "head": {
+                "operationId": "headSearchStreets",
+                "summary": "Lijst met straten (JSON of GeoJSON) (alleen headers)",
+                "description": "Identiek aan de GET, maar zonder body: alleen de validators `Last-Modified` en `ETag`. Bedoeld voor clients die de gegevens lokaal cachen en met één request willen vaststellen of er iets is gewijzigd.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Q"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Limit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Offset"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Lat"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Lon"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Type"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfNoneMatch"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfModifiedSince"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succesvolle response; de validators staan in de headers, er is geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop voor het laatst een straatnaam is toegevoegd of gewijzigd, inclusief de aan straten gekoppelde afbeeldingen. Geldt voor de hele collectie, ook bij een gefilterde opvraging.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            },
+                            "Vary": {
+                                "description": "De responsevorm hangt af van de Accept-header (JSON of GeoJSON); caches moeten daarop variëren.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Accept"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Niet gewijzigd sinds de meegestuurde `If-None-Match` of `If-Modified-Since`. De response heeft geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop voor het laatst een straatnaam is toegevoegd of gewijzigd, inclusief de aan straten gekoppelde afbeeldingen. Geldt voor de hele collectie, ook bij een gefilterde opvraging.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            },
+                            "Vary": {
+                                "description": "De responsevorm hangt af van de Accept-header (JSON of GeoJSON); caches moeten daarop variëren.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Accept"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Geen straten gevonden."
+                    },
+                    "406": {
+                        "description": "Ongeldige accept header."
+                    }
+                }
             }
         },
         "/straatnamen/{identifier}": {
@@ -167,24 +294,74 @@
                 "description": "Geeft informatie over de gespecificeerde straat, inclusief geometrie.",
                 "parameters": [
                     {
-                        "name": "identifier",
-                        "in": "path",
-                        "description": "Identifier van de straat. **Let op**: de identifier is een URI, deze moet correct ge-URL-encoded worden als path parameter.",
-                        "required": true,
-                        "example": "https://n2t.net/ark:/60537/bN5GSH",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "$ref": "#/components/parameters/StraatIdentifier"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfNoneMatch"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfModifiedSince"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Informatie over de straat.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop deze straatnaam of een van de daaraan gekoppelde afbeeldingen voor het laatst is gewijzigd.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            }
+                        },
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Straat"
                                 }
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Niet gewijzigd sinds de meegestuurde `If-None-Match` of `If-Modified-Since`. De response heeft geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop deze straatnaam of een van de daaraan gekoppelde afbeeldingen voor het laatst is gewijzigd.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
                             }
                         }
                     },
@@ -205,6 +382,84 @@
                         }
                     }
                 }
+            },
+            "head": {
+                "operationId": "headGetStreetById",
+                "summary": "Informatie over een straatnaam (alleen headers)",
+                "description": "Identiek aan de GET, maar zonder body: alleen de validators `Last-Modified` en `ETag`. Bedoeld voor clients die de gegevens lokaal cachen en met één request willen vaststellen of er iets is gewijzigd.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/StraatIdentifier"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfNoneMatch"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfModifiedSince"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succesvolle response; de validators staan in de headers, er is geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop deze straatnaam of een van de daaraan gekoppelde afbeeldingen voor het laatst is gewijzigd.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Niet gewijzigd sinds de meegestuurde `If-None-Match` of `If-Modified-Since`. De response heeft geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop deze straatnaam of een van de daaraan gekoppelde afbeeldingen voor het laatst is gewijzigd.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missende of ongeldige identifier."
+                    },
+                    "404": {
+                        "description": "Straat niet gevonden."
+                    }
+                }
             }
         },
         "/afbeeldingen/{identifier}": {
@@ -214,41 +469,48 @@
                 "description": "Geeft informatie over de aan een straat gekoppelde afbeeldingen, waaronder de IIIF URL.",
                 "parameters": [
                     {
-                        "name": "identifier",
-                        "in": "path",
-                        "description": "Identifier van de straat. **Let op**: de identifier is een URI, deze moet correct ge-URL-encoded worden als path parameter.",
-                        "required": true,
-                        "example": "https://n2t.net/ark:/60537/bN5GSH",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "$ref": "#/components/parameters/AfbeeldingenIdentifier"
                     },
                     {
-                        "name": "limit",
-                        "in": "query",
-                        "description": "Het maximum aantal afbeeldingen dat geretourneerd moet worden.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32",
-                            "default": 25
-                        }
+                        "$ref": "#/components/parameters/AfbeeldingenLimit"
                     },
                     {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "Het aantal afbeeldingen om over te slaan.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32",
-                            "default": 0
-                        }
+                        "$ref": "#/components/parameters/AfbeeldingenOffset"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfNoneMatch"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfModifiedSince"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Succesvolle response met afbeeldingen data.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop een van de aan deze straat gekoppelde afbeeldingen voor het laatst is gewijzigd. Geldt voor alle afbeeldingen van de straat, ongeacht limit en offset.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            }
+                        },
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -269,6 +531,33 @@
                             }
                         }
                     },
+                    "304": {
+                        "description": "Niet gewijzigd sinds de meegestuurde `If-None-Match` of `If-Modified-Since`. De response heeft geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop een van de aan deze straat gekoppelde afbeeldingen voor het laatst is gewijzigd. Geldt voor alle afbeeldingen van de straat, ongeacht limit en offset.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Missende of ongeldige identifier."
                     },
@@ -284,6 +573,90 @@
                                 }
                             }
                         }
+                    }
+                }
+            },
+            "head": {
+                "operationId": "headGetImagesByStreetId",
+                "summary": "Aan een straat gekoppelde afbeeldingen (alleen headers)",
+                "description": "Identiek aan de GET, maar zonder body: alleen de validators `Last-Modified` en `ETag`. Bedoeld voor clients die de gegevens lokaal cachen en met één request willen vaststellen of er iets is gewijzigd.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AfbeeldingenIdentifier"
+                    },
+                    {
+                        "$ref": "#/components/parameters/AfbeeldingenLimit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/AfbeeldingenOffset"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfNoneMatch"
+                    },
+                    {
+                        "$ref": "#/components/parameters/IfModifiedSince"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succesvolle response; de validators staan in de headers, er is geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop een van de aan deze straat gekoppelde afbeeldingen voor het laatst is gewijzigd. Geldt voor alle afbeeldingen van de straat, ongeacht limit en offset.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Niet gewijzigd sinds de meegestuurde `If-None-Match` of `If-Modified-Since`. De response heeft geen body.",
+                        "headers": {
+                            "Last-Modified": {
+                                "description": "Moment waarop een van de aan deze straat gekoppelde afbeeldingen voor het laatst is gewijzigd. Geldt voor alle afbeeldingen van de straat, ongeacht limit en offset.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "http-date"
+                                },
+                                "example": "Sun, 09 Aug 2026 18:11:14 GMT"
+                            },
+                            "ETag": {
+                                "description": "Sterke validator over de responsebody. Stuur hem terug in `If-None-Match` om te controleren of er iets is gewijzigd.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "\"9f86d081884c7d659a2feaa0c55ad015\""
+                            },
+                            "Cache-Control": {
+                                "description": "De response mag gecached worden, maar moet bij elk hergebruik opnieuw gevalideerd worden.",
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "public, max-age=0, must-revalidate"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missende of ongeldige identifier."
+                    },
+                    "404": {
+                        "description": "Straat niet gevonden."
                     }
                 }
             }
@@ -554,6 +927,140 @@
                             }
                         }
                     }
+                }
+            }
+        },
+        "parameters": {
+            "Q": {
+                "name": "q",
+                "description": "De te zoeken term in de straatnaam.",
+                "in": "query",
+                "required": false,
+                "example": "achter",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "Limit": {
+                "name": "limit",
+                "in": "query",
+                "description": "Het maximum aantal straten dat geretourneerd moet worden.",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "default": 2000
+                }
+            },
+            "Offset": {
+                "name": "offset",
+                "in": "query",
+                "description": "Het aantal straten om over te slaan.",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "default": 0
+                }
+            },
+            "Lat": {
+                "name": "lat",
+                "in": "query",
+                "description": "Geef lijst van straatnamen uitgaande van de breedtegraad (en lengtegraad)",
+                "required": false,
+                "schema": {
+                    "type": "number",
+                    "format": "float",
+                    "example": "52.0049"
+                }
+            },
+            "Lon": {
+                "name": "lon",
+                "in": "query",
+                "description": "Geef lijst van straatnamen uitgaande van de lengtegraad (en breedtegraad)",
+                "required": false,
+                "schema": {
+                    "type": "number",
+                    "format": "float",
+                    "example": "4.6782"
+                }
+            },
+            "Type": {
+                "name": "type",
+                "in": "query",
+                "description": "Filter straten op type (huidig, verdwenen of alle).",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "huidig",
+                        "verdwenen",
+                        "alle"
+                    ],
+                    "default": "alle"
+                }
+            },
+            "StraatIdentifier": {
+                "name": "identifier",
+                "in": "path",
+                "description": "Identifier van de straat. **Let op**: de identifier is een URI, deze moet correct ge-URL-encoded worden als path parameter.",
+                "required": true,
+                "example": "https://n2t.net/ark:/60537/bN5GSH",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "AfbeeldingenIdentifier": {
+                "name": "identifier",
+                "in": "path",
+                "description": "Identifier van de straat. **Let op**: de identifier is een URI, deze moet correct ge-URL-encoded worden als path parameter.",
+                "required": true,
+                "example": "https://n2t.net/ark:/60537/bN5GSH",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "AfbeeldingenLimit": {
+                "name": "limit",
+                "in": "query",
+                "description": "Het maximum aantal afbeeldingen dat geretourneerd moet worden.",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "default": 25
+                }
+            },
+            "AfbeeldingenOffset": {
+                "name": "offset",
+                "in": "query",
+                "description": "Het aantal afbeeldingen om over te slaan.",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "default": 0
+                }
+            },
+            "IfNoneMatch": {
+                "name": "If-None-Match",
+                "in": "header",
+                "description": "De ETag uit een eerdere response. Is de representatie ongewijzigd, dan volgt een `304 Not Modified` zonder body. Gaat voor op `If-Modified-Since`.",
+                "required": false,
+                "example": "\"9f86d081884c7d659a2feaa0c55ad015\"",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "IfModifiedSince": {
+                "name": "If-Modified-Since",
+                "in": "header",
+                "description": "De Last-Modified uit een eerdere response. Is er sindsdien niets gewijzigd, dan volgt een `304 Not Modified` zonder body. Wordt genegeerd zodra `If-None-Match` is meegestuurd.",
+                "required": false,
+                "example": "Sun, 09 Aug 2026 18:11:14 GMT",
+                "schema": {
+                    "type": "string",
+                    "format": "http-date"
                 }
             }
         }

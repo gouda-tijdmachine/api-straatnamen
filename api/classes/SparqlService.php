@@ -130,7 +130,7 @@ ORDER BY ' . $sort
     public function get_street($streetidentifier): array
     {
         return $this->SPARQL('
-SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?problematisch ?geometry (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) WHERE {
+SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?problematisch ?geometry ?gewijzigd (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) WHERE {
   BIND(<' . $streetidentifier . '> AS ?identifier)
   ?identifier a gtm:Straat ;
               o:item_set ?itemset ;
@@ -144,6 +144,18 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?pr
     IF(?itemset = <https://n2t.net/ark:/60537/biWGGg>, "heden", "verdwenen")
     AS ?type
   )
+
+  # Laatste wijziging van de straat zelf of van een van de gekoppelde afbeeldingen.
+  # schema:sdDatePublished is de Omeka "laatst gewijzigd"-datum; o:modified staat niet in de RDF.
+  {
+    SELECT (MAX(?d) AS ?gewijzigd) WHERE {
+      { <' . $streetidentifier . '> schema:sdDatePublished ?d }
+      UNION
+      { ?afb schema:spatialCoverage/gtm:straat <' . $streetidentifier . '> ; schema:sdDatePublished ?d }
+      UNION
+      { ?afb2 schema:spatialCoverage/gtm:straat <' . $streetidentifier . '> ; o:media/schema:sdDatePublished ?d }
+    }
+  }
 
   OPTIONAL {
     ?identifier schema:mentions ?vermeldingen  
@@ -164,7 +176,7 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?pr
     ?identifier schema:alternateName ?alt_names 
   }
 } 
-GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?problematisch ?geometry
+GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?problematisch ?geometry ?gewijzigd
 ');
     }
 
@@ -174,13 +186,26 @@ GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?genoemd_naar ?ligging ?
             '
 SELECT * WHERE {
   BIND( <' . $streetidentifier . '> AS ?straat)
+
+  # Laatste wijziging van een van de afbeeldingen van deze straat (item of media).
+  {
+    SELECT (MAX(?d) AS ?gewijzigd) WHERE {
+      { ?afb schema:spatialCoverage/gtm:straat <' . $streetidentifier . '> ; schema:sdDatePublished ?d }
+      UNION
+      { ?afb2 schema:spatialCoverage/gtm:straat <' . $streetidentifier . '> ; o:media/schema:sdDatePublished ?d }
+    }
+  }
+
     ?identifier schema:spatialCoverage/gtm:straat ?straat ;
       schema:name ?titel ;
       schema:url ?url ;
       schema:dateCreated ?datering ;
-      o:primary_media/o:source ?iiif_info_json ;
-      #o:media/schema:thumbnailUrl ?thumbnail ;
-      o:media/o:thumbnail_urls/o:square ?thumbnail .
+      o:primary_media/o:source ?iiif_info_json .
+
+    # o:thumbnail_urls/o:square is uit de RDF-export verdwenen (0 triples). Optioneel houden,
+    # zodat de query blijft werken en hem weer oppikt zodra de export hem teruggeeft; anders
+    # leidt DataService de thumbnail af uit dezelfde IIIF-bron als ?iiif_info_json.
+    OPTIONAL { ?identifier o:media/o:thumbnail_urls/o:square ?thumbnail }
 
     OPTIONAL { ?identifier gtm:informatieAuteursRechten ?informatie_auteursrechten }
     OPTIONAL { ?identifier schema:creator/schema:name ?vervaardiger }
@@ -188,6 +213,25 @@ SELECT * WHERE {
 ORDER BY ASC(?datering) ?titel
 '
         );
+    }
+
+    /**
+     * Hoogste wijzigingsdatum over alle straten en de daaraan gekoppelde afbeeldingen.
+     *
+     * Bewust dataset-breed, ook bij een gefilterde index: dat is een bovengrens, dus hooguit een
+     * overbodige refresh en nooit een onterechte 304. De ETag dekt de exacte filtercombinatie.
+     */
+    public function get_last_modified_index(): array
+    {
+        return $this->SPARQL('
+SELECT (MAX(?d) AS ?gewijzigd) WHERE {
+  { ?straat a gtm:Straat ; schema:sdDatePublished ?d }
+  UNION
+  { ?afb schema:spatialCoverage/gtm:straat ?straat1 ; schema:sdDatePublished ?d }
+  UNION
+  { ?afb2 schema:spatialCoverage/gtm:straat ?straat2 ; o:media/schema:sdDatePublished ?d }
+}
+');
     }
 
     #--------------------

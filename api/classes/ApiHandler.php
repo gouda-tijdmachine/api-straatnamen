@@ -48,7 +48,7 @@ class ApiHandler
             $lon = ResponseHelper::getFloatQueryParam('lon', 0);
 
             $polygonen = $this->dataService->geoJsonStreets($q, $limit, $offset, $type, $lat, $lon);
-            ResponseHelper::geoJson($polygonen);
+            ResponseHelper::geoJson($polygonen, 200, $this->dataService->getIndexLastModified(), 'Accept');
         } catch (Exception $e) {
             $this->logAndReturnError($e, 'getStreetsGeoJson');
         }
@@ -72,7 +72,7 @@ class ApiHandler
                 return;
             }
 
-            ResponseHelper::json($result);
+            ResponseHelper::json($result, 200, $this->dataService->getIndexLastModified(), 'Accept');
         } catch (Exception $e) {
             $this->logAndReturnError($e, 'searchStreets');
         }
@@ -89,7 +89,7 @@ class ApiHandler
                 return;
             }
 
-            $street = $this->dataService->getStreet($identifier);
+            list($street, $gewijzigd) = $this->dataService->getStreet($identifier);
 
             if (!$street) {
                 ResponseHelper::error('Straat niet gevonden.', 404, 'NOT_FOUND');
@@ -97,7 +97,7 @@ class ApiHandler
                 return;
             }
 
-            ResponseHelper::json($street);
+            ResponseHelper::json($street, 200, $gewijzigd);
         } catch (Exception $e) {
             $this->logAndReturnError($e, 'getStreetById');
         }
@@ -116,7 +116,7 @@ class ApiHandler
             $limit = ResponseHelper::getIntQueryParam('limit', 25);
             $offset = ResponseHelper::getIntQueryParam('offset', 0);
 
-            list($aantalimages, $images) = $this->dataService->getImages($identifier, $limit, $offset);
+            list($aantalimages, $images, $gewijzigd) = $this->dataService->getImages($identifier, $limit, $offset);
 
             if ($aantalimages == 0) {
                 ResponseHelper::error('Straat niet gevonden.', 404, 'NOT_FOUND');
@@ -124,7 +124,7 @@ class ApiHandler
                 return;
             }
 
-            ResponseHelper::json([ "aantal" => $aantalimages, "afbeeldingen" => $images ]);
+            ResponseHelper::json([ "aantal" => $aantalimages, "afbeeldingen" => $images ], 200, $gewijzigd);
         } catch (Exception $e) {
             $this->logAndReturnError($e, 'getImagesByStreetId');
         }

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once 'ResponseHelper.php';
+
 class Router
 {
     private $routes = [];
@@ -20,6 +22,12 @@ class Router
     {
         $requestMethod = $_SERVER['REQUEST_METHOD'];
         $requestUri = $_SERVER['REQUEST_URI'];
+
+        // HEAD deelt de GET-routes; ResponseHelper onderdrukt de body. Zo kan een client met
+        // een enkele HEAD de validators ophalen zonder de representatie te downloaden.
+        if ($requestMethod === 'HEAD') {
+            $requestMethod = 'GET';
+        }
 
         $parsedUri = parse_url($requestUri);
         $path = preg_replace("/\/api-[a-z]+/", "", $parsedUri['path']);
@@ -80,10 +88,15 @@ class Router
         $docsPath = __DIR__ . '/../docs.html';
         if (file_exists($docsPath)) {
             header('Content-Type: text/html; charset=utf-8');
-            readfile($docsPath);
+            header('Content-Length: ' . filesize($docsPath));
+            if (ResponseHelper::wantsBody()) {
+                readfile($docsPath);
+            }
         } else {
             http_response_code(404);
-            echo json_encode(['error' => 'Route not found']);
+            if (ResponseHelper::wantsBody()) {
+                echo json_encode(['error' => 'Route not found']);
+            }
         }
     }
 
@@ -92,7 +105,9 @@ class Router
         if (preg_match('#/assets/(.+)$#', $path, $matches)) {
             $file = $matches[1];
         } elseif (preg_match('#qa-results#', $path, $matches)) {
-            $file = readfile(__DIR__ . '/../../tests/qa-results/index.html');
+            if (ResponseHelper::wantsBody()) {
+                readfile(__DIR__ . '/../../tests/qa-results/index.html');
+            }
 
             return true;
         } elseif ($path === '/favicon.ico') {
@@ -139,7 +154,9 @@ class Router
         header('Cache-Control: public, max-age=31536000, immutable');
         header('Access-Control-Allow-Origin: *');
 
-        readfile($realPath);
+        if (ResponseHelper::wantsBody()) {
+            readfile($realPath);
+        }
 
         return true;
     }
