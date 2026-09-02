@@ -709,7 +709,7 @@
                     "identifier": {
                         "type": "string",
                         "format": "uri",
-                        "description": "De persistente HTTP URI van de beschrijving van de afbeelding.",
+                        "description": "De persistente HTTP URI van de straat.",
                         "example": "https://n2t.net/ark:/60537/bjMurf"
                     },
                     "naam": {
@@ -718,7 +718,10 @@
                         "description": "De straatnaam."
                     },
                     "alt_names": {
-                        "type": "array",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
                         "items": {
                             "type": "string"
                         },
@@ -731,27 +734,48 @@
                         "description": "Een lijst van alternatieve namen en/of schrijfwijzen voor de straat."
                     },
                     "genoemd_naar": {
-                        "type": "string",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "example": "Genoemd naar de tweesprong die werd gevormd door de Tiendeweg (vóór de verlegging ten gerieve van de bouw van de Sint-Janskerk) en het verlengde van de Kleiweg. De oorspronkelijke naam van de straat was ook Twistrate, wat een straat met een tweesprong betekent. In het midden van de vijftiende eeuw is de naam verbasterd tot Wijdstraat.",
                         "description": "Beschrijving van waar of naar wie de straat is genoemd."
                     },
                     "ligging": {
-                        "type": "string",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "example": "van de Markt naar de Dubbele Buurt en de Lage Gouwe",
                         "description": "De ligging van de straat."
                     },
                     "vermeldingen": {
-                        "type": "string",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "example": "B&W besluit, nummer 17651 (2-12-1980)",
                         "description": "Officieel stuk waarin de straat is vermeld, zoals een raadsbesluit."
                     },
                     "problematisch": {
-                        "type": "string",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "example": "Cornelis en Frederik de Houtman waren Goudse zeevaarders die reizen maakten naar Oost-Indië ...",
                         "description": "Uitleg bij de straatnaam die naar hedendaagse opvattingen mogelijk niet door de beugel kan."
                     },
                     "geometry": {
                         "$ref": "#/components/schemas/GeoJSONGeometry"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "heden",
+                            "verdwenen"
+                        ],
+                        "example": "heden",
+                        "description": "Of de straatnaam nu nog in gebruik is (\"heden\") of verdwenen (\"verdwenen\")."
                     }
                 }
             },
@@ -809,18 +833,49 @@
                         "example": "https://images.memorix.nl/sahm/iiif/48468880-0bf7-f10d-21e4-5cff7a6ff4e0/full/250,/0/default.jpg",
                         "description": "Een kleine weergave van de afbeelding (veelal 200 pixels bij landschapsformaat en 200px hoog bij portretformaat."
                     },
-                    "vervaardiger": {
+                    "image": {
                         "type": "string",
+                        "format": "uri",
+                        "example": "https://images.memorix.nl/sahm/iiif/48468880-0bf7-f10d-21e4-5cff7a6ff4e0/full/500,/0/default.jpg",
+                        "description": "Een grotere weergave van de afbeelding, 500 pixels breed, uit dezelfde IIIF-bron als de thumbnail."
+                    },
+                    "iiif_info_json": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://images.memorix.nl/sahm/iiif/48468880-0bf7-f10d-21e4-5cff7a6ff4e0/info.json",
+                        "description": "De info.json van de IIIF Image API, waarmee een viewer de afbeelding op elk gewenst formaat en uitsnede kan opvragen."
+                    },
+                    "vervaardiger": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "example": "Kiebert, J.H. (Gouda)",
                         "description": "De naam van de maker van de afbeelding."
                     },
+                    "url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uri",
+                        "example": "https://samh.nl/bronnen/beeldbank/detail/2acb468e-94cc-d916-0b5d-3a8db9469ae9/media/48468880-0bf7-f10d-21e4-5cff7a6ff4e0",
+                        "description": "De pagina van de afbeelding op de website van de bronorganisatie."
+                    },
                     "datering": {
-                        "type": "string",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "example": "1865",
                         "description": "Het jaar waarin de afbeelding is gemaakt."
                     },
-                    "bronorganisatie": {
+                    "bronbronorganisatie": {
                         "type": "string",
+                        "enum": [
+                            "Streekarchief Midden-Holland",
+                            "Rijkdienst voor het Cultureel Erfgoed"
+                        ],
                         "example": "Streekarchief Midden-Holland",
                         "description": "De organisatie die de afbeelding in haar collectie heeft, bijv. Streekarchief Midden-Holland (SAMH) of Rijkdienst voor het Cultureel Erfgoed (RCE)."
                     }

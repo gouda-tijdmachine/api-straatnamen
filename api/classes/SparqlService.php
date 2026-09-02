@@ -207,7 +207,6 @@ SELECT * WHERE {
     # leidt DataService de thumbnail af uit dezelfde IIIF-bron als ?iiif_info_json.
     OPTIONAL { ?identifier o:media/o:thumbnail_urls/o:square ?thumbnail }
 
-    OPTIONAL { ?identifier gtm:informatieAuteursRechten ?informatie_auteursrechten }
     OPTIONAL { ?identifier schema:creator/schema:name ?vervaardiger }
 }
 ORDER BY ASC(?datering) ?titel

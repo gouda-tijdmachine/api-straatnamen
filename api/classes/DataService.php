@@ -159,7 +159,6 @@ class DataService
                 'image' => !empty($iiif) ? str_replace("info.json", "full/500,/0/default.jpg", $iiif) : '',
                 'iiif_info_json' => $iiif,
                 'vervaardiger' => $foto['vervaardiger']['value'] ?? null,
-                'informatie_auteursrechten' => !empty($foto['informatie_auteursrechten']['value']) ? str_replace("https://samh.nl/auteursrechten#", "", $foto['informatie_auteursrechten']['value']) : null,
                 'url' => $foto['url']['value'] ?? null,
                 'datering' => $foto['datering']['value'] ?? null,
                 'bronbronorganisatie' => (!empty($foto['url']['value']) && strstr($foto['url']['value'], 'samh.nl') !== false) ? 'Streekarchief Midden-Holland' : 'Rijkdienst voor het Cultureel Erfgoed'
