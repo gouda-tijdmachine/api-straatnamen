@@ -762,7 +762,7 @@
                         "type": "string",
                         "format": "uri",
                         "description": "De persistente HTTP URI van de straat.",
-                        "example": "https://n2t.net/ark:/60537/b5PMTR"
+                        "example": "https://n2t.net/ark:/60537/bjMurf"
                     },
                     "naam": {
                         "type": "string",
@@ -782,7 +782,7 @@
                     "aantal": {
                         "type": "integer",
                         "description": "Aantal afbeeldingen voor gespecificeerde straatnaam.",
-                        "example": "https://n2t.net/ark:/60537/b5PMTR"
+                        "example": 92
                     },
                     "afbeeldingen": {
                         "$ref": "#/components/schemas/Afbeelding"
@@ -796,27 +796,27 @@
                         "type": "string",
                         "format": "uri",
                         "description": "De persistente HTTP URI van de beschrijving van de afbeelding.",
-                        "example": "https://n2t.net/ark:/60537/b5PMTR"
+                        "example": "https://n2t.net/ark:/60537/buzzqh"
                     },
                     "titel": {
                         "type": "string",
-                        "example": "Wijdstraat, tabakswinkel Van Vreumingen, Sinterklaasetalage",
+                        "example": "Bebouwing aan de Markt, c. 1870. Drie panden in de Wijdstraat 20 t/m 24, links winkel voor vloerbedekking",
                         "description": "De titel van de afbeelding, veelal meer de vorm van een lange beschrijving dan een kort titel."
                     },
                     "thumbnail": {
                         "type": "string",
                         "format": "uri",
-                        "example": "https://www.goudatijdmachine.nl/omeka/files/medium/70d726f9642726c3e7a0080536cc43715fe8e025.jpg",
+                        "example": "https://images.memorix.nl/sahm/iiif/48468880-0bf7-f10d-21e4-5cff7a6ff4e0/full/250,/0/default.jpg",
                         "description": "Een kleine weergave van de afbeelding (veelal 200 pixels bij landschapsformaat en 200px hoog bij portretformaat."
                     },
                     "vervaardiger": {
                         "type": "string",
-                        "example": "Daems, H.J.",
+                        "example": "Kiebert, J.H. (Gouda)",
                         "description": "De naam van de maker van de afbeelding."
                     },
                     "datering": {
                         "type": "string",
-                        "example": "1950",
+                        "example": "1865",
                         "description": "Het jaar waarin de afbeelding is gemaakt."
                     },
                     "bronorganisatie": {
@@ -1005,7 +1005,7 @@
                 "in": "path",
                 "description": "Identifier van de straat. **Let op**: de identifier is een URI, deze moet correct ge-URL-encoded worden als path parameter.",
                 "required": true,
-                "example": "https://n2t.net/ark:/60537/bN5GSH",
+                "example": "https://n2t.net/ark:/60537/bjMurf",
                 "schema": {
                     "type": "string"
                 }
@@ -1015,7 +1015,7 @@
                 "in": "path",
                 "description": "Identifier van de straat. **Let op**: de identifier is een URI, deze moet correct ge-URL-encoded worden als path parameter.",
                 "required": true,
-                "example": "https://n2t.net/ark:/60537/bN5GSH",
+                "example": "https://n2t.net/ark:/60537/bjMurf",
                 "schema": {
                     "type": "string"
                 }
