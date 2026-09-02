@@ -161,7 +161,7 @@ class DataService
                 'vervaardiger' => $foto['vervaardiger']['value'] ?? null,
                 'url' => $foto['url']['value'] ?? null,
                 'datering' => $foto['datering']['value'] ?? null,
-                'bronbronorganisatie' => (!empty($foto['url']['value']) && strstr($foto['url']['value'], 'samh.nl') !== false) ? 'Streekarchief Midden-Holland' : 'Rijkdienst voor het Cultureel Erfgoed'
+                'bronbronorganisatie' => (!empty($foto['url']['value']) && strstr($foto['url']['value'], 'samh.nl') !== false) ? 'Streekarchief Midden-Holland' : 'Rijksdienst voor het Cultureel Erfgoed'
             ];
         }
 

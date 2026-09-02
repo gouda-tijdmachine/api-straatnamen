@@ -90,11 +90,12 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "panden": {
+                                        "straten": {
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/StraatIndex"
-                                            }
+                                            },
+                                            "description": "De gevonden straten, beperkt door limit en offset."
                                         },
                                         "aantal": {
                                             "type": "integer",
@@ -514,19 +515,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "panden": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Afbeeldingen"
-                                            }
-                                        },
-                                        "aantal": {
-                                            "type": "integer",
-                                            "description": "Totaal aantal gevonden afbeeldingen."
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/Afbeeldingen"
                                 }
                             }
                         }
@@ -793,10 +782,18 @@
                         "example": "Wijdstraat",
                         "description": "De straatnaam."
                     },
-                    "alt_names": {
-                        "type": "string",
-                        "example": "Waaistraat, Wijtstraet, Wytstraat, Twistraete",
-                        "description": "Een komma gescheiden lijst van alternatieve namen en/of schrijfwijzen voor de straat."
+                    "naam_alt": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Weidestraat, Wytstraat, Wijtstraet, Wijstraet, Wijstraat, Wijnstraat, Wijdestraat, Weidstraat, 't Wijstraat, Waaistraat, Twistraete, Twistraat, Twijtstraat, Twijstraat, Twaaistraat"
+                        ],
+                        "description": "Alternatieve namen en schrijfwijzen voor de straat, of null als die er niet zijn. De array bevat op dit moment één element waarin alle namen door komma's gescheiden aan elkaar staan; het detail-endpoint /straatnamen/{identifier} levert ze wel als losse elementen."
                     }
                 }
             },
@@ -809,7 +806,11 @@
                         "example": 92
                     },
                     "afbeeldingen": {
-                        "$ref": "#/components/schemas/Afbeelding"
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Afbeelding"
+                        },
+                        "description": "De gevonden afbeeldingen, beperkt door limit en offset."
                     }
                 }
             },
@@ -874,10 +875,10 @@
                         "type": "string",
                         "enum": [
                             "Streekarchief Midden-Holland",
-                            "Rijkdienst voor het Cultureel Erfgoed"
+                            "Rijksdienst voor het Cultureel Erfgoed"
                         ],
                         "example": "Streekarchief Midden-Holland",
-                        "description": "De organisatie die de afbeelding in haar collectie heeft, bijv. Streekarchief Midden-Holland (SAMH) of Rijkdienst voor het Cultureel Erfgoed (RCE)."
+                        "description": "De organisatie die de afbeelding in haar collectie heeft, bijv. Streekarchief Midden-Holland (SAMH) of Rijksdienst voor het Cultureel Erfgoed (RCE)."
                     }
                 }
             },
