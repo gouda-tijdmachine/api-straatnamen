@@ -12,11 +12,11 @@
     "servers": [
         {
             "url": "https://api-straatnamen.goudatijdmachine.nl",
-            "description": "Production API"
+            "description": "Productie. Gebruik deze host voor browser-clients: alleen hier staan de conditionele requestheaders (If-None-Match, If-Modified-Since) cross-origin toe."
         },
         {
             "url": "https://www.goudatijdmachine.nl/api-straatnamen",
-            "description": "Development API"
+            "description": "Alternatief pad op de hoofdsite. Let op: de vhost daar overschrijft Access-Control-Allow-Headers, waardoor een conditionele request vanuit een browser op een andere origin afketst op de preflight. Alleen geschikt voor same-origin gebruik of niet-browser-clients."
         }
     ],
     "paths": {

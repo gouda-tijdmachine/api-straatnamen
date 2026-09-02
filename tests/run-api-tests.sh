@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#BASE_URL=https://api-straatnamen.goudatijdmachine.nl
+# De productiehost. www.goudatijdmachine.nl/api-straatnamen serveert via een symlink dezelfde
+# code, maar die vhost overschrijft Access-Control-Allow-Headers en staat de conditionele
+# requestheaders niet toe; browser-clients horen op deze host te zitten.
 # Overschrijfbaar voor een lokale run: BASE_URL=http://127.0.0.1:8099 bash run-api-tests.sh
-BASE_URL="${BASE_URL:-https://www.goudatijdmachine.nl/api-straatnamen}"
+BASE_URL="${BASE_URL:-https://api-straatnamen.goudatijdmachine.nl}"
 
 # API Testing Script for Gouda Tijdmachine Straatnamen API
 # Tests all endpoints defined in the OpenAPI specification (except for clear cache)
@@ -568,7 +570,9 @@ print_test_header "HTTP check - CORS"
 test_endpoint "OPTIONS" "$BASE_URL/straatnamen" 204 "OPTIONS op bestaand pad /straatnamen levert 204"
 test_endpoint "OPTIONS" "$BASE_URL/onbekend-pad" 204 "OPTIONS op onbekend pad levert ook 204 (globale CORS-preflight)"
 test_header "OPTIONS" "$BASE_URL/straatnamen" "Access-Control-Allow-Origin" "^\*$" "OPTIONS-preflight bevat Access-Control-Allow-Origin: *"
-test_header "OPTIONS" "$BASE_URL/straatnamen" "Access-Control-Allow-Methods" "GET, HEAD, POST, OPTIONS" "OPTIONS-preflight bevat Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS"
+# Formaat-agnostisch: op /api-straatnamen komt deze header uit PHP ("GET, HEAD, POST, OPTIONS"),
+# op www overschrijft de vhost hem met een eigen lijst ("GET,HEAD,OPTIONS,POST,PUT").
+test_header "OPTIONS" "$BASE_URL/straatnamen" "Access-Control-Allow-Methods" "GET,[[:space:]]*HEAD" "OPTIONS-preflight staat zowel GET als HEAD toe"
 test_header "OPTIONS" "$BASE_URL/straatnamen" "Access-Control-Allow-Headers" "Content-Type" "OPTIONS-preflight bevat Access-Control-Allow-Headers: Content-Type"
 
 # Test SAMH links
