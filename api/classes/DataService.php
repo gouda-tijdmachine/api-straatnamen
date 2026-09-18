@@ -108,15 +108,26 @@ class DataService
             $alt_names = null;
         }
 
+        // Uitleg bij een problematische straatnaam hoort bij de naamgeving en gaat daarom,
+        // gescheiden door een newline, mee in genoemd_naar. Het losse veld problematisch
+        // is deprecated en blijft alleen voor achterwaartse compatibiliteit staan.
+        $genoemdNaar = $street[0]['genoemd_naar']['value'] ?? null;
+        $problematisch = $street[0]['problematisch']['value'] ?? null;
+        if ($problematisch !== null && $problematisch !== '') {
+            $genoemdNaar = ($genoemdNaar === null || $genoemdNaar === '')
+                ? $problematisch
+                : $genoemdNaar . "\n" . $problematisch;
+        }
+
         $streetData = [
             'identifier' => $straatidentifier,
             'naam' => $street[0]['naam']['value'],
             'alt_names' => $alt_names,
-            'genoemd_naar' => $street[0]['genoemd_naar']['value'] ?? null,
+            'genoemd_naar' => $genoemdNaar,
             'ligging' => $street[0]['ligging']['value'] ?? null,
             'vermeldingen' => $street[0]['vermeldingen']['value'] ?? null,
             'eerste_vermelding' => $street[0]['eerste_vermelding']['value'] ?? null,
-            'problematisch' => $street[0]['problematisch']['value'] ?? null,
+            'problematisch' => $problematisch,
             'geometry' => $geometry,
              'type' => $street[0]['type']['value'],
         ];

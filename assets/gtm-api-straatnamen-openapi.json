@@ -3,7 +3,7 @@
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
         "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
-        "version": "v1.6.0",
+        "version": "v1.7.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
             "url": "https://www.goudatijdmachine.nl/straatnamen/"
@@ -727,8 +727,8 @@
                             "string",
                             "null"
                         ],
-                        "example": "Genoemd naar de tweesprong die werd gevormd door de Tiendeweg (vóór de verlegging ten gerieve van de bouw van de Sint-Janskerk) en het verlengde van de Kleiweg. De oorspronkelijke naam van de straat was ook Twistrate, wat een straat met een tweesprong betekent. In het midden van de vijftiende eeuw is de naam verbasterd tot Wijdstraat.",
-                        "description": "Beschrijving van waar of naar wie de straat is genoemd."
+                        "example": "Genoemd naar zie Houtmansgracht.\nCornelis en Frederik de Houtman waren Goudse zeevaarders die reizen maakten naar Oost-Indië. Deze reizen vormden het begin van de VOC en de kolonisatie van Nederlands Oost-Indië. ...",
+                        "description": "Beschrijving van waar of naar wie de straat is genoemd. Als de straatnaam naar hedendaagse opvattingen problematisch is, volgt na een newline (\\n) de uitleg daarbij."
                     },
                     "ligging": {
                         "type": [
@@ -759,8 +759,9 @@
                             "string",
                             "null"
                         ],
+                        "deprecated": true,
                         "example": "Cornelis en Frederik de Houtman waren Goudse zeevaarders die reizen maakten naar Oost-Indië ...",
-                        "description": "Uitleg bij de straatnaam die naar hedendaagse opvattingen mogelijk niet door de beugel kan."
+                        "description": "Uitleg bij de straatnaam die naar hedendaagse opvattingen mogelijk niet door de beugel kan. Deprecated: deze tekst zit nu ook in genoemd_naar. Wordt in een volgende versie verwijderd."
                     },
                     "geometry": {
                         "$ref": "#/components/schemas/GeoJSONGeometry"
