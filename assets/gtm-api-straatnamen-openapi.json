@@ -3,7 +3,7 @@
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
         "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
-        "version": "v1.7.0",
+        "version": "v1.8.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
             "url": "https://www.goudatijdmachine.nl/straatnamen/"
@@ -746,13 +746,13 @@
                         "example": "B&W besluit, nummer 17651 (2-12-1980)",
                         "description": "Officieel stuk waarin de straat is vermeld, zoals een raadsbesluit."
                     },
-                    "eerste_vermelding": {
+                    "sinds": {
                         "type": [
-                            "string",
+                            "integer",
                             "null"
                         ],
-                        "example": "1334",
-                        "description": "Jaar (JJJJ) of datum (JJJJ-MM-DD, ISO 8601) van de vroegst bekende vermelding van de straat; null als onbekend."
+                        "example": 1334,
+                        "description": "Jaartal van de vroegst bekende vermelding van de straat (of van het naamgevingsbesluit); null als onbekend."
                     },
                     "problematisch": {
                         "type": [

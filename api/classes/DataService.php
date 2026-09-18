@@ -126,7 +126,7 @@ class DataService
             'genoemd_naar' => $genoemdNaar,
             'ligging' => $street[0]['ligging']['value'] ?? null,
             'vermeldingen' => $street[0]['vermeldingen']['value'] ?? null,
-            'eerste_vermelding' => $street[0]['eerste_vermelding']['value'] ?? null,
+            'sinds' => isset($street[0]['sinds']['value']) ? (int)substr($street[0]['sinds']['value'], 0, 4) : null,
             'problematisch' => $problematisch,
             'geometry' => $geometry,
              'type' => $street[0]['type']['value'],
