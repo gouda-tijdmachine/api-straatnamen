@@ -1,0 +1,4 @@
+# Vendored Swagger UI (geminificeerde derdepartijcode) domineert anders de graph
+assets/swagger-ui-bundle.js
+assets/swagger-ui-standalone-preset.js
+assets/swagger-ui.css
