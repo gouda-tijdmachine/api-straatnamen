@@ -8,3 +8,5 @@ composer.lock
 
 # PHP CS Fixer
 .php-cs-fixer.cache
+# graphify
+graphify-out/
