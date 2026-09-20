@@ -60,35 +60,37 @@ class CacheService
             }
 
         } catch (Throwable $e) {
-            echo "Connection failed: " . $e->getMessage();
+            // Zonder Redis draait de API ongecachet door; niets naar de response schrijven.
+            error_log("Redis connection failed: " . $e->getMessage());
+            $this->redis = null;
         }
     }
 
     public function get($key)
     {
-        if (isset($_GET['no_cache']) || !CACHE_ENABLED) {
+        if (isset($_GET['no_cache']) || $this->redis === null) {
             return null;
         }
         try {
             $value = $this->redis->get("API-STRAAT:$key");
 
             return $value === false ? null : $value;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Local Redis Get Error: " . $e->getMessage());
 
             return null;
         }
     }
 
-    public function put($key, $value, $seconds = 3600)
+    public function put($key, $value, $seconds = CACHE_DURATION_SECONDS)
     {
-        if (!CACHE_ENABLED) {
+        if ($this->redis === null) {
             return null;
         }
 
         try {
             return $this->redis->setex("API-STRAAT:$key", $seconds, $value);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Local Redis Put Error: " . $e->getMessage());
 
             return false;
@@ -97,6 +99,10 @@ class CacheService
 
     public function clear_cache()
     {
+        if ($this->redis === null) {
+            return 0;
+        }
+
         $prefix = "API-STRAAT:*";
 
         $it = null;

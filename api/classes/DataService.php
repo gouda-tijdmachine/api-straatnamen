@@ -4,21 +4,17 @@ declare(strict_types=1);
 
 require_once 'geoPHP.php';
 require_once 'SparqlService.php';
-require_once 'CacheService.php';
 require_once 'ResponseHelper.php';
 
 class DataService
 {
     private SparqlService $sparqlService;
-    private CacheService $cache;
-
     private $geoPHP;
 
     public function __construct()
     {
         $this->sparqlService = new SparqlService();
         $this->geoPHP = new GeoPHP();
-        $this->cache = new CacheService();
     }
 
     public function geoJsonStreets($q, $limit, $offset, $type, $lat = 0, $lon = 0): array

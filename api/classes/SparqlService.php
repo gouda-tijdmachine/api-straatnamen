@@ -2,9 +2,17 @@
 
 declare(strict_types=1);
 
+require_once 'CacheService.php';
+
 class SparqlService
 {
+    // De dataset-brede wijzigingsdatum wordt kort gecachet en telt mee in de cache-key van alle
+    // andere queries: wijzigt de store, dan verversen data en Last-Modified samen binnen deze TTL,
+    // terwijl ongewijzigde resultaten de volle CACHE_DURATION_SECONDS blijven staan.
+    private const VERSION_TTL_SECONDS = 300;
+
     private CacheService $cache;
+    private ?array $lastModifiedIndex = null;
 
     public function __construct()
     {
@@ -227,7 +235,7 @@ ORDER BY ASC(?datering) ?titel
      */
     public function get_last_modified_index(): array
     {
-        return $this->SPARQL('
+        return $this->lastModifiedIndex ??= $this->SPARQL('
 SELECT (MAX(?d) AS ?gewijzigd) WHERE {
   { ?straat a gtm:Straat ; schema:sdDatePublished ?d }
   UNION
@@ -235,7 +243,12 @@ SELECT (MAX(?d) AS ?gewijzigd) WHERE {
   UNION
   { ?afb2 schema:spatialCoverage/gtm:straat ?straat2 ; o:media/schema:sdDatePublished ?d }
 }
-');
+', SPARQL_LOG, self::VERSION_TTL_SECONDS, false);
+    }
+
+    private function datasetVersion(): string
+    {
+        return $this->get_last_modified_index()[0]['gewijzigd']['value'] ?? '';
     }
 
     #--------------------
@@ -279,16 +292,16 @@ SELECT (MAX(?d) AS ?gewijzigd) WHERE {
         return $response;
     }
 
-    private function getSPARQLresults($sparqlQueryString, $offset = 0): ?array
+    private function getSPARQLresults($sparqlQueryString, $offset = 0, int $ttl = CACHE_DURATION_SECONDS, string $version = ''): ?array
     {
-        $cache_key = md5($sparqlQueryString . $offset);
+        $cache_key = md5($sparqlQueryString . $offset . $version);
         $contents = $this->cache->get($cache_key);
         if (!$contents) {
             $contents = $this->doSPARQLcall($sparqlQueryString, $offset);
             if ($contents === null) {
                 return null;
             }
-            $this->cache->put($cache_key, $contents);
+            $this->cache->put($cache_key, $contents, $ttl);
         }
 
         $result = json_decode($contents, true);
@@ -301,7 +314,7 @@ SELECT (MAX(?d) AS ?gewijzigd) WHERE {
         return $result;
     }
 
-    private function SPARQL($sparqlQueryString, $bLog = SPARQL_LOG): array
+    private function SPARQL($sparqlQueryString, $bLog = SPARQL_LOG, int $ttl = CACHE_DURATION_SECONDS, bool $versioned = true): array
     {
         $sparqlQueryString = preg_replace('/  /', ' ', SPARQL_PREFIX . $sparqlQueryString);
 
@@ -315,7 +328,7 @@ SELECT (MAX(?d) AS ?gewijzigd) WHERE {
             file_put_contents("sparql.log", "-------------\n\n" . $callerFunction . " > " . print_r($callerArgs, true) . "\n\n" . $sparqlQueryString . "\n\n", FILE_APPEND);
         }
 
-        $sparqlResult = $this->getSPARQLresults($sparqlQueryString);
+        $sparqlResult = $this->getSPARQLresults($sparqlQueryString, 0, $ttl, $versioned ? $this->datasetVersion() : '');
 
         if ($sparqlResult === null) {
             return [];
