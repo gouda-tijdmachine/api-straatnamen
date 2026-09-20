@@ -3,7 +3,7 @@
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
         "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
-        "version": "v1.8.0",
+        "version": "v1.9.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
             "url": "https://www.goudatijdmachine.nl/straatnamen/"
@@ -728,7 +728,31 @@
                             "null"
                         ],
                         "example": "Genoemd naar zie Houtmansgracht.\nCornelis en Frederik de Houtman waren Goudse zeevaarders die reizen maakten naar Oost-Indië. Deze reizen vormden het begin van de VOC en de kolonisatie van Nederlands Oost-Indië. ...",
-                        "description": "Beschrijving van waar of naar wie de straat is genoemd. Als de straatnaam naar hedendaagse opvattingen problematisch is, volgt na een newline (\\n) de uitleg daarbij."
+                        "description": "Beschrijving (Nederlands) van waar of naar wie de straat is genoemd. Als de straatnaam naar hedendaagse opvattingen problematisch is, volgt na een newline (\\n) de uitleg daarbij."
+                    },
+                    "genoemd_naar_en": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "Named after Dr Arie Scheygrond, born in Gouda on 9 February 1905 ...",
+                        "description": "Engelse vertaling van genoemd_naar; null als niet beschikbaar. Als er een uitleg bij een problematische straatnaam in deze taal is, volgt die na een newline (\\n)."
+                    },
+                    "genoemd_naar_fr": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "Cette rue porte le nom de M. Arie Scheygrond, né à Gouda le 9 février 1905 ...",
+                        "description": "Franse vertaling van genoemd_naar; null als niet beschikbaar. Als er een uitleg bij een problematische straatnaam in deze taal is, volgt die na een newline (\\n)."
+                    },
+                    "genoemd_naar_de": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "Benannt nach Herrn Dr. Arie Scheygrond, geboren am 9. Februar 1905 in Gouda ...",
+                        "description": "Duitse vertaling van genoemd_naar; null als niet beschikbaar. Als er een uitleg bij een problematische straatnaam in deze taal is, volgt die na een newline (\\n)."
                     },
                     "ligging": {
                         "type": [
@@ -736,7 +760,31 @@
                             "null"
                         ],
                         "example": "van de Markt naar de Dubbele Buurt en de Lage Gouwe",
-                        "description": "De ligging van de straat."
+                        "description": "De ligging van de straat (Nederlands)."
+                    },
+                    "ligging_en": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "from the Market to the Dubbele Buurt and the Lage Gouwe",
+                        "description": "Engelse vertaling van ligging; null als niet beschikbaar."
+                    },
+                    "ligging_fr": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "du Markt vers la Dubbele Buurt et la Lage Gouwe",
+                        "description": "Franse vertaling van ligging; null als niet beschikbaar."
+                    },
+                    "ligging_de": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "vom Markt zur Dubbele Buurt und zur Lage Gouwe",
+                        "description": "Duitse vertaling van ligging; null als niet beschikbaar."
                     },
                     "vermeldingen": {
                         "type": [

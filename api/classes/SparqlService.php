@@ -90,8 +90,6 @@ SELECT
   ?identifier ?naam ?geometry ?type
   (GROUP_CONCAT(DISTINCT STR(?altname); SEPARATOR=", ") AS ?naam_alt)
   (GROUP_CONCAT(DISTINCT STR(?vermeldingen); SEPARATOR=", ") AS ?vermeldingen_all)
-  (GROUP_CONCAT(DISTINCT STR(?genoemd_naar); SEPARATOR=", ") AS ?genoemd_naar_all)
-  (GROUP_CONCAT(DISTINCT STR(?ligging); SEPARATOR=", ") AS ?ligging_all)
 WHERE {
   {
 
@@ -119,8 +117,6 @@ WHERE {
   OPTIONAL { ?identifier geo:hasGeometry/geo:asWKT ?geometry }
   OPTIONAL { ?identifier schema:alternateName ?altname }
   OPTIONAL { ?identifier schema:mentions ?vermeldingen }
-  OPTIONAL { ?identifier gtm:genoemdNaar ?genoemd_naar }
-  OPTIONAL { ?identifier gtm:ligging ?ligging }
 }
 GROUP BY ?identifier ?naam ?geometry ?type ' . $groupby . '
 ORDER BY ' . $sort
@@ -130,7 +126,7 @@ ORDER BY ' . $sort
     public function get_street($streetidentifier): array
     {
         return $this->SPARQL('
-SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?ligging ?problematisch ?geometry ?gewijzigd (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) WHERE {
+SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?genoemd_naar_en ?genoemd_naar_fr ?genoemd_naar_de ?ligging ?ligging_en ?ligging_fr ?ligging_de ?problematisch ?problematisch_en ?problematisch_fr ?problematisch_de ?geometry ?gewijzigd (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) WHERE {
   BIND(<' . $streetidentifier . '> AS ?identifier)
   ?identifier a gtm:Straat ;
               o:item_set ?itemset ;
@@ -163,15 +159,21 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?ligg
   OPTIONAL {
     ?identifier schema:startDate ?sinds
   }
-  OPTIONAL {
-    ?identifier gtm:genoemdNaar ?genoemd_naar 
-  }
-  OPTIONAL {
-    ?identifier gtm:ligging ?ligging
-  }
-  OPTIONAL {
-    ?identifier gtm:problematischeStraatnaam ?problematisch
-  }
+  # Meertalig: per taal een eigen OPTIONAL zodat er één rij per straat blijft. isLiteral omdat
+  # gtm:genoemdNaar ook een IRI (de vernoemde persoon) kan zijn. De problematisch-vertalingen
+  # worden alleen gebruikt om ze in DataService aan genoemd_naar_<taal> te plakken.
+  OPTIONAL { ?identifier gtm:genoemdNaar ?genoemd_naar FILTER(isLiteral(?genoemd_naar) && LANG(?genoemd_naar) = "nl") }
+  OPTIONAL { ?identifier gtm:genoemdNaar ?genoemd_naar_en FILTER(isLiteral(?genoemd_naar_en) && LANG(?genoemd_naar_en) = "en") }
+  OPTIONAL { ?identifier gtm:genoemdNaar ?genoemd_naar_fr FILTER(isLiteral(?genoemd_naar_fr) && LANG(?genoemd_naar_fr) = "fr") }
+  OPTIONAL { ?identifier gtm:genoemdNaar ?genoemd_naar_de FILTER(isLiteral(?genoemd_naar_de) && LANG(?genoemd_naar_de) = "de") }
+  OPTIONAL { ?identifier gtm:ligging ?ligging FILTER(isLiteral(?ligging) && LANG(?ligging) = "nl") }
+  OPTIONAL { ?identifier gtm:ligging ?ligging_en FILTER(isLiteral(?ligging_en) && LANG(?ligging_en) = "en") }
+  OPTIONAL { ?identifier gtm:ligging ?ligging_fr FILTER(isLiteral(?ligging_fr) && LANG(?ligging_fr) = "fr") }
+  OPTIONAL { ?identifier gtm:ligging ?ligging_de FILTER(isLiteral(?ligging_de) && LANG(?ligging_de) = "de") }
+  OPTIONAL { ?identifier gtm:problematischeStraatnaam ?problematisch FILTER(isLiteral(?problematisch) && LANG(?problematisch) = "nl") }
+  OPTIONAL { ?identifier gtm:problematischeStraatnaam ?problematisch_en FILTER(isLiteral(?problematisch_en) && LANG(?problematisch_en) = "en") }
+  OPTIONAL { ?identifier gtm:problematischeStraatnaam ?problematisch_fr FILTER(isLiteral(?problematisch_fr) && LANG(?problematisch_fr) = "fr") }
+  OPTIONAL { ?identifier gtm:problematischeStraatnaam ?problematisch_de FILTER(isLiteral(?problematisch_de) && LANG(?problematisch_de) = "de") }
   OPTIONAL {
     ?identifier geo:hasGeometry/geo:asWKT ?geometry
   }
@@ -179,7 +181,7 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?ligg
     ?identifier schema:alternateName ?alt_names 
   }
 } 
-GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?ligging ?problematisch ?geometry ?gewijzigd
+GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?genoemd_naar_en ?genoemd_naar_fr ?genoemd_naar_de ?ligging ?ligging_en ?ligging_fr ?ligging_de ?problematisch ?problematisch_en ?problematisch_fr ?problematisch_de ?geometry ?gewijzigd
 ');
     }
 

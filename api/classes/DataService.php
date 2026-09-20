@@ -109,25 +109,34 @@ class DataService
         }
 
         // Uitleg bij een problematische straatnaam hoort bij de naamgeving en gaat daarom,
-        // gescheiden door een newline, mee in genoemd_naar. Het losse veld problematisch
-        // is deprecated en blijft alleen voor achterwaartse compatibiliteit staan.
-        $genoemdNaar = $street[0]['genoemd_naar']['value'] ?? null;
-        $problematisch = $street[0]['problematisch']['value'] ?? null;
-        if ($problematisch !== null && $problematisch !== '') {
-            $genoemdNaar = ($genoemdNaar === null || $genoemdNaar === '')
-                ? $problematisch
-                : $genoemdNaar . "\n" . $problematisch;
+        // gescheiden door een newline, mee in genoemd_naar, per taal met de uitleg in diezelfde
+        // taal. Het losse veld problematisch (alleen Nederlands) is deprecated en blijft alleen
+        // voor achterwaartse compatibiliteit staan. Alle taalvarianten zijn optioneel.
+        $tekst = static function (string $veld) use ($street): ?string {
+            $waarde = $street[0][$veld]['value'] ?? null;
+            return ($waarde === null || $waarde === '') ? null : $waarde;
+        };
+        $genoemdNaar = [];
+        $ligging = [];
+        foreach (['', '_en', '_fr', '_de'] as $taal) {
+            $naar = $tekst('genoemd_naar' . $taal);
+            $uitleg = $tekst('problematisch' . $taal);
+            if ($uitleg !== null) {
+                $naar = ($naar === null) ? $uitleg : $naar . "\n" . $uitleg;
+            }
+            $genoemdNaar['genoemd_naar' . $taal] = $naar;
+            $ligging['ligging' . $taal] = $tekst('ligging' . $taal);
         }
 
         $streetData = [
             'identifier' => $straatidentifier,
             'naam' => $street[0]['naam']['value'],
             'alt_names' => $alt_names,
-            'genoemd_naar' => $genoemdNaar,
-            'ligging' => $street[0]['ligging']['value'] ?? null,
+            ...$genoemdNaar,
+            ...$ligging,
             'vermeldingen' => $street[0]['vermeldingen']['value'] ?? null,
             'sinds' => isset($street[0]['sinds']['value']) ? (int)substr($street[0]['sinds']['value'], 0, 4) : null,
-            'problematisch' => $problematisch,
+            'problematisch' => $tekst('problematisch'),
             'geometry' => $geometry,
              'type' => $street[0]['type']['value'],
         ];
