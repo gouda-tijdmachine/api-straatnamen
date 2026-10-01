@@ -108,20 +108,26 @@ class DataService
         // gescheiden door een newline, mee in genoemd_naar, per taal met de uitleg in diezelfde
         // taal. Het losse veld problematisch (alleen Nederlands) is deprecated en blijft alleen
         // voor achterwaartse compatibiliteit staan. Alle taalvarianten zijn optioneel.
+		// 1-10-2026 > besloten om problematisch niet te deprecaten, om het los te houden
+		//             en in gui een aparte kop toe te voegen, dit alles ivm met redactie van alle teksten
+		
         $tekst = static function (string $veld) use ($street): ?string {
             $waarde = $street[0][$veld]['value'] ?? null;
             return ($waarde === null || $waarde === '') ? null : $waarde;
         };
         $genoemdNaar = [];
         $ligging = [];
+		$problematisch = [];
+		
         foreach (['', '_en', '_fr', '_de'] as $taal) {
             $naar = $tekst('genoemd_naar' . $taal);
-            $uitleg = $tekst('problematisch' . $taal);
-            if ($uitleg !== null) {
-                $naar = ($naar === null) ? $uitleg : $naar . "\n" . $uitleg;
-            }
+            #$uitleg = $tekst('problematisch' . $taal);
+            #if ($uitleg !== null) {
+            #    $naar = ($naar === null) ? $uitleg : $naar . "\n\n" . $uitleg;
+            #}
             $genoemdNaar['genoemd_naar' . $taal] = $naar;
             $ligging['ligging' . $taal] = $tekst('ligging' . $taal);
+			$problematisch['problematisch' . $taal] = $tekst('problematisch' . $taal);
         }
 
         $streetData = [
@@ -132,7 +138,7 @@ class DataService
             ...$ligging,
             'vermeldingen' => $street[0]['vermeldingen']['value'] ?? null,
             'sinds' => isset($street[0]['sinds']['value']) ? (int)substr($street[0]['sinds']['value'], 0, 4) : null,
-            'problematisch' => $tekst('problematisch'),
+            ...$problematisch,
             'geometry' => $geometry,
              'type' => $street[0]['type']['value'],
         ];

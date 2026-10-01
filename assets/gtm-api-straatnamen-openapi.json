@@ -3,7 +3,7 @@
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
         "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
-        "version": "v1.9.0",
+        "version": "v1.10.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
             "url": "https://www.goudatijdmachine.nl/straatnamen/"
@@ -807,9 +807,32 @@
                             "string",
                             "null"
                         ],
-                        "deprecated": true,
                         "example": "Cornelis en Frederik de Houtman waren Goudse zeevaarders die reizen maakten naar Oost-Indië ...",
-                        "description": "Uitleg bij de straatnaam die naar hedendaagse opvattingen mogelijk niet door de beugel kan. Deprecated: deze tekst zit nu ook in genoemd_naar. Wordt in een volgende versie verwijderd."
+                        "description": "Uitleg bij de straatnaam die naar hedendaagse opvattingen mogelijk niet door de beugel kan."
+                    },
+                    "problematisch_en": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "Cornelis and Frederik de Houtman were sailors from Gouda who made voyages to the East Indies ...",
+                        "description": "Engelse vertaling van problematisch."
+                    },
+                    "problematisch_fr": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "Cornelis et Frederik de Houtman étaient des marins originaires de Gouda qui ont effectué des voyages vers les Indes orientales ...",
+                        "description": "Franse vertaling van problematisch."
+                    },
+                    "problematisch_de": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "Cornelis und Frederik de Houtman waren Seeleute aus Gouda, die Reisen nach Ostindien unternahmen ...",
+                        "description": "Duitse vertaling van problematisch."
                     },
                     "geometry": {
                         "$ref": "#/components/schemas/GeoJSONGeometry"

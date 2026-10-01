@@ -1,0 +1,3 @@
+certbot certonly --webroot -w /home/http/goudatijdmachine.nl/api-straatnamen -d api-straatnamen.goudatijdmachine.nl 
+certbot certonly --webroot -w /home/http/goudatijdmachine.nl/api-viewer -d api-viewer.goudatijdmachine.nl
+
