@@ -957,7 +957,7 @@
                             "null"
                         ],
                         "example": "0440. 52779",
-                        "description": "Het inventarisnummer van de afbeelding bij de bronorganisatie. Bij het Streekarchief Midden-Holland in de vorm \"toegang. nummer\" (zoals in de SAMH-beeldbank), bij de RCE het beeldnummer."
+                        "description": "Het inventarisnummer van de afbeelding bij de bronorganisatie. Bij het Streekarchief Midden-Holland in de vorm \"toegang. nummer\" (zoals in de SAMH-beeldbank), bij de RCE het beeldnummer. null betekent dat er geen nummer bekend is."
                     },
                     "bronbronorganisatie": {
                         "type": "string",
