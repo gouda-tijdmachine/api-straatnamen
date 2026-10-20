@@ -134,7 +134,7 @@ ORDER BY ' . $sort
     public function get_street($streetidentifier): array
     {
         return $this->SPARQL('
-SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?genoemd_naar_en ?genoemd_naar_fr ?genoemd_naar_de ?ligging ?ligging_en ?ligging_fr ?ligging_de ?problematisch ?problematisch_en ?problematisch_fr ?problematisch_de ?geometry ?gewijzigd (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) WHERE {
+SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?genoemd_naar_en ?genoemd_naar_fr ?genoemd_naar_de ?ligging ?ligging_en ?ligging_fr ?ligging_de ?problematisch ?problematisch_en ?problematisch_fr ?problematisch_de ?geometry ?gewijzigd (GROUP_CONCAT(DISTINCT STR(?alt_names); SEPARATOR="|") AS ?alt_names_grouped) (GROUP_CONCAT(DISTINCT STR(?buurt_naam); SEPARATOR="|") AS ?buurten_grouped) WHERE {
   BIND(<' . $streetidentifier . '> AS ?identifier)
   ?identifier a gtm:Straat ;
               o:item_set ?itemset ;
@@ -187,6 +187,14 @@ SELECT ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?geno
   }
   OPTIONAL {
     ?identifier schema:alternateName ?alt_names 
+  }
+  # Buurt(en) waarin de straat ligt (niet de wijk); een straat kan in geen, één of meer buurten liggen.
+  # ceo:buurtOfWijkNaam is de kale naam ("Turfmarkt e.o."), schema:name is "Gouda, buurt 12, Turfmarkt e.o. (BAG)".
+  # Scheidingsteken | omdat een buurtnaam een komma kan bevatten ("Lusten-, Burgen- en Steinenbuurt").
+  OPTIONAL {
+    ?identifier hg:liesIn ?buurt .
+    ?buurt a gtm:Buurt ;
+           <https://linkeddata.cultureelerfgoed.nl/def/ceo#buurtOfWijkNaam> ?buurt_naam
   }
 } 
 GROUP BY ?identifier ?itemset ?naam ?type ?vermeldingen ?sinds ?genoemd_naar ?genoemd_naar_en ?genoemd_naar_fr ?genoemd_naar_de ?ligging ?ligging_en ?ligging_fr ?ligging_de ?problematisch ?problematisch_en ?problematisch_fr ?problematisch_de ?geometry ?gewijzigd

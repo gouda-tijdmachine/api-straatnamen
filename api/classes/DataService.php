@@ -104,6 +104,15 @@ class DataService
             $alt_names = null;
         }
 
+        // Een straat kan in geen, één of meer buurten liggen. GROUP_CONCAT heeft geen vaste volgorde,
+        // dus sorteren voor een stabiele response.
+        if (!empty($street[0]['buurten_grouped']['value'])) {
+            $buurten = explode('|', $street[0]['buurten_grouped']['value']);
+            sort($buurten);
+        } else {
+            $buurten = null;
+        }
+
         // Uitleg bij een problematische straatnaam hoort bij de naamgeving en gaat daarom,
         // gescheiden door een newline, mee in genoemd_naar, per taal met de uitleg in diezelfde
         // taal. Het losse veld problematisch (alleen Nederlands) is deprecated en blijft alleen
@@ -136,6 +145,7 @@ class DataService
             'alt_names' => $alt_names,
             ...$genoemdNaar,
             ...$ligging,
+            'buurten' => $buurten,
             'vermeldingen' => $street[0]['vermeldingen']['value'] ?? null,
             'sinds' => isset($street[0]['sinds']['value']) ? (int)substr($street[0]['sinds']['value'], 0, 4) : null,
             ...$problematisch,

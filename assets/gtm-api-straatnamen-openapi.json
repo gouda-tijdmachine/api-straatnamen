@@ -3,7 +3,7 @@
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
         "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
-        "version": "v1.11.0",
+        "version": "v1.12.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
             "url": "https://www.goudatijdmachine.nl/straatnamen/"
@@ -785,6 +785,19 @@
                         ],
                         "example": "vom Markt zur Dubbele Buurt und zur Lage Gouwe",
                         "description": "Duitse vertaling van ligging; null als niet beschikbaar."
+                    },
+                    "buurten": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Turfmarkt e.o."
+                        ],
+                        "description": "De buurt(en) volgens de BAG-buurtindeling waarin de straat ligt, alfabetisch gesorteerd; een straat kan in meerdere buurten liggen. null als er geen buurt aan de straat gekoppeld is."
                     },
                     "vermeldingen": {
                         "type": [
