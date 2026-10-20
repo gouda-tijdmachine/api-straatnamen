@@ -481,7 +481,7 @@ test_json_endpoint "GET" "$BASE_URL/straatnamen?limit=5" 406 "Ongeldige Accept h
 
 # GET /afbeeldingen/{identifier}
 print_test_header "GET /afbeeldingen/{identifier}"
-test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q" 200 "Geef informatie over de Lombardsteeg (https://n2t.net/ark:/60537/bn4b1Q)" "application/json" '.afbeeldingen | length > 0 and (.[0] | has("identifier") and has("titel") and has("thumbnail"))'
+test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q" 200 "Geef informatie over de Lombardsteeg (https://n2t.net/ark:/60537/bn4b1Q)" "application/json" '.afbeeldingen | length > 0 and (.[0] | has("identifier") and has("titel") and has("thumbnail") and has("inventarisnummer"))'
 test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q?limit=3" 200 "Beperk afbeeldingen tot 3 met limit parameter en check aantal-totaal" "application/json" '(.afbeeldingen | length == 3) and (.aantal | type == "number") and (.aantal >= 3)'
 test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1Q?limit=5&offset=999999" 200 "Offset voorbij beschikbare afbeeldingen levert lege array" "application/json" '.afbeeldingen | length == 0'
 test_json_endpoint "GET" "$BASE_URL/afbeeldingen/https%3A%2F%2Fn2t.net%2Fark%3A%2F60537%2Fbn4b1a" 404 "Geef informatie over een niet-bestaande straat"

@@ -221,6 +221,9 @@ SELECT * WHERE {
     OPTIONAL { ?identifier o:media/o:thumbnail_urls/o:square ?thumbnail }
 
     OPTIONAL { ?identifier schema:creator/schema:name ?vervaardiger }
+
+    # Inventarisnummer bij de bronorganisatie: de tweede schema:identifier naast de GTM-URI.
+    OPTIONAL { ?identifier schema:identifier ?inventarisnummer FILTER(!STRSTARTS(STR(?inventarisnummer), "http")) }
 }
 ORDER BY ASC(?datering) ?titel
 '

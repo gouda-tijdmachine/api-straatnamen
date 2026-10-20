@@ -3,7 +3,7 @@
     "info": {
         "title": "Gouda Tijdmachine Straatnamen API",
         "description": "Deze [getestte](/test-results/) read-only REST API voorziet in de informatiebehoefte qua straatnamen en afbeeldingen van straten; alle geïdentifieerd met een persistente HTTP URI op basis van ARK.",
-        "version": "v1.10.0",
+        "version": "v1.11.0",
         "contact": {
             "name": "Gouda Tijdmachine Straatnamen",
             "url": "https://www.goudatijdmachine.nl/straatnamen/"
@@ -950,6 +950,14 @@
                         ],
                         "example": "1865",
                         "description": "Het jaar waarin de afbeelding is gemaakt."
+                    },
+                    "inventarisnummer": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "0440. 52779",
+                        "description": "Het inventarisnummer van de afbeelding bij de bronorganisatie. Bij het Streekarchief Midden-Holland in de vorm \"toegang. nummer\" (zoals in de SAMH-beeldbank), bij de RCE het beeldnummer."
                     },
                     "bronbronorganisatie": {
                         "type": "string",
